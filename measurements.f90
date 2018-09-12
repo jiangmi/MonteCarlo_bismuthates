@@ -1,0 +1,236 @@
+module measurements
+ integer, parameter :: nbin = 20
+ integer nmeas0
+
+ ! accumulated quantites
+ double precision aenergy, ax, ax2
+ double precision antot, anbis, anox, anoy
+ double precision anpa1g  !Number of oxygen holes with A1g symmetry
+ double precision, dimension(:), allocatable :: aspolaron
+ double precision, dimension(:), allocatable :: abpolaron
+ double precision, dimension(:,:), allocatable :: aspolaron_ij
+
+ !Below are for binned quantites
+ double precision, dimension(1:nbin) :: benergy 
+ double precision, dimension(1:nbin) :: bx
+ double precision, dimension(1:nbin) :: bx2
+ double precision, dimension(1:nbin) :: bnbis
+ double precision, dimension(1:nbin) :: bntot
+ double precision, dimension(1:nbin) :: bnox
+ double precision, dimension(1:nbin) :: bnoy
+ double precision, dimension(1:nbin) :: bnpa1g
+ double precision, dimension(:,:), allocatable :: bspolaron
+ double precision, dimension(:,:), allocatable :: bbpolaron
+ double precision, dimension(:,:,:), allocatable :: bspolaron_ij
+contains
+ !=============================================================================
+ subroutine get_err(bins,mean,std)
+ implicit none
+ integer i
+ double precision, dimension(1:nbin) :: bins
+ double precision mean, std
+ mean = sum(bins(:))/dfloat(nbin)
+ std = sqrt(sum((bins(:)-mean)**2.0d0)/dfloat(nbin-1))
+ return
+ end subroutine get_err
+ !=============================================================================
+ subroutine allocate_quantities()
+ use parameters
+ implicit none
+ allocate(aspolaron(0:Nbi-1))
+ allocate(abpolaron(0:Nbi-1))
+ allocate(aspolaron_ij(0:Nbi-1,0:Nbi-1))
+ allocate(bspolaron(1:nbin, 0:Nbi-1))
+ allocate(bbpolaron(1:nbin, 0:Nbi-1))
+ allocate(bspolaron_ij(1:nbin, 0:Nbi-1, 0:Nbi-1))
+ end subroutine allocate_quantities
+ !=============================================================================
+ subroutine deallocate_quantities()
+ implicit none
+ deallocate(aspolaron)
+ deallocate(abpolaron)
+ deallocate(aspolaron_ij)
+ deallocate(bspolaron)
+ deallocate(bbpolaron)
+ deallocate(bspolaron_ij)
+ end subroutine deallocate_quantities
+ !=============================================================================
+ subroutine zero_accumulators()
+ use parameters
+ implicit none
+ nmeas0 = 0
+ aenergy = 0.0d0
+ aX = 0.0d0
+ ax2 = 0.0d0
+ anox = 0.0d0
+ anoy = 0.0d0
+ anbis = 0.0d0
+ antot = 0.0d0
+ anpa1g = 0.0d0
+ aspolaron = 0.0d0
+ abpolaron = 0.0d0 
+ aspolaron_ij = 0.0d0
+ end subroutine zero_accumulators
+ !=============================================================================
+ subroutine populate_bins(bin)
+ implicit none
+ integer bin
+ print*, 'Populating bin ', bin
+ benergy(bin) = aenergy/dfloat(nmeas0)
+ bX(bin) = aX/dfloat(nmeas0)
+ bX2(bin) = aX2/dfloat(nmeas0)
+ bntot(bin) = antot/dfloat(nmeas0)
+ bnbis(bin) = anbis/dfloat(nmeas0)
+ bnox(bin) = anox/dfloat(nmeas0)
+ bnoy(bin) = anoy/dfloat(nmeas0)
+ bnpa1g(bin) = anpa1g/dfloat(nmeas0)
+ bspolaron(bin,:) = aspolaron/dfloat(nmeas0)
+ bbpolaron(bin,:) = abpolaron/dfloat(nmeas0)
+ bspolaron_ij(bin,:,:) = aspolaron_ij/dfloat(nmeas0)
+ return
+ end subroutine populate_bins
+ 
+!============================================================================
+ ! do_measurements below
+ !============================================================================
+ subroutine do_measurements(X)
+ use parameters
+ use cluster, only: return_index_for_coordinates
+ use monte_carlo, only: compute_total_E, get_H
+ implicit none
+ integer ix, iy, jx, jy, tau, nn, nnp, mm, nnn
+ integer ixp, iyp, ixm, iym
+ integer jxp, jyp, jxm, jym
+ integer i, j, info
+ integer lwork
+ double precision, dimension(0:N-1,0:N-1) :: U
+ double precision, allocatable, dimension(:) :: work
+ double precision ntot, nbis, nox, noy, npa1g
+ double precision Xi_A1g, Xj_A1g
+ double precision a_inn, a_inn2, a_jnn, a_jnn2
+ double precision a_innp, a_innp2, a_jnnp, a_jnnp2
+ double precision s_inn, s_inn2, s_innp, s_innp2
+ double precision s_jnn, s_jnn2, s_jnnp, s_jnnp2 
+ double precision tmp1, tmp2
+ double precision energy, fermi, fac, fermi1, fac1, factor
+ double precision rtmp1, rtmp2
+ double precision, dimension(0:N-1) :: X
+ double precision, dimension(0:N-1) :: Ek
+
+ nmeas0 = nmeas0 + 1
+ call compute_total_E(energy,X)
+ aenergy = aenergy + energy
+ rtmp1 = 0.0d0
+ rtmp2 = 0.0d0
+ do i = Nbi,N-1
+  rtmp1 = rtmp1 + X(i)/(N-NBi)
+  rtmp2 = rtmp2 + X(i)*X(i)/(N-NBi)
+ enddo 
+ aX2 = aX2 + rtmp2
+ aX = aX + rtmp1
+ 
+ !Measure the electronic quantities
+
+ call get_H(U,X)
+
+ lwork = 3*N-1
+ allocate(work(1:lwork))
+ call dsyev('V','U',N,U,N,Ek,work,lwork,info)
+ if (info.ne.0) then
+    print *,"dsyev error", N, lwork, info
+ endif
+
+ nox = 0.0d0
+ noy = 0.0d0
+ nbis = 0.0d0
+ ntot = 0.0d0
+ npa1g = 0.0d0
+
+ !loop over Bi sites
+ do ix = 0,Nx-1
+  do iy = 0,Ny-1
+   i = return_index_for_coordinates(ix,iy,0)
+   ixp = return_index_for_coordinates(ix,iy,1) 
+   iyp = return_index_for_coordinates(ix,iy,2) 
+   ixm = return_index_for_coordinates(ix-1,iy,1)
+   iym = return_index_for_coordinates(ix,iy-1,2)
+   Xi_A1g = 0.5d0*(X(ixp) - X(ixm) + X(iyp) - X(iym))
+
+   !sum over eigenstates
+   do nn = 0,N-1       
+     fermi = 1.0d0/(exp(beta*(Ek(nn)-mu))+1.0d0)
+     fac = 2.0d0*fermi/Nbi
+     nbis = nbis + fac*U(i,nn)*U(i,nn)
+     nox  = nox  + fac*U(ixp,nn)*U(ixp,nn)
+     noy  = noy  + fac*U(iyp,nn)*U(iyp,nn)
+     ntot = ntot + fac*(U(i,nn)*U(i,nn)+U(ixp,nn)*U(ixp,nn)+U(iyp,nn)*U(iyp,nn))
+
+     a_inn = 0.5d0*(U(ixp,nn) - U(ixm,nn) + U(iyp,nn) - U(iym,nn))
+     s_inn = U(i,nn)
+     a_inn2 = a_inn*a_inn
+     s_inn2 = s_inn*s_inn
+
+     npa1g = npa1g + fac*a_inn2
+
+     ! aspolaron does not need Nbi because of (i) index
+    ! aspolaron(i) = aspolaron(i) + Xi_A1g*2.0d0*fermi*(s_inn2 + a_inn2)
+     aspolaron(i) = aspolaron(i) + 2.0d0*fermi*(s_inn2 + a_inn2)
+
+     ! double sum over eigenstates
+     do nnp = 0,N-1     
+       fermi1 = 1.0d0/(exp(beta*(Ek(nnp)-mu))+1.0d0)
+       fac1 = 2.0d0*fermi1/Nbi
+
+       a_innp = 0.5d0*(U(ixp,nnp) - U(ixm,nnp) + U(iyp,nnp) - U(iym,nnp))
+       s_innp = U(i,nnp)
+       a_innp2 = a_innp*a_innp
+       s_innp2 = s_innp*s_innp
+       
+       abpolaron(i) = abpolaron(i) + 2.0d0*fermi**fermi1* &!Xi_A1g*   &
+                        (a_inn2*s_innp2 + s_inn2*s_innp2 + a_inn2*a_innp2)
+       !!!!!!!!!!!!!!!!!!!!!!!!!!
+       !!       <L_i*L_j>      !!
+       !!!!!!!!!!!!!!!!!!!!!!!!!!
+       do jx = 0,Nx-1
+         do jy = 0,Ny-1
+           j = return_index_for_coordinates(jx,jy,0)
+           jxp = return_index_for_coordinates(jx  ,jy  ,1)
+           jxm = return_index_for_coordinates(jx-1,jy  ,1)
+           jyp = return_index_for_coordinates(jx  ,jy  ,1)
+           jym = return_index_for_coordinates(jx  ,jy-1,1)
+           Xj_A1g = 0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
+           a_jnnp = 0.5d0*(U(jxp,nnp) - U(jxm,nnp) + U(jyp,nnp) - U(jym,nnp))
+           a_jnn  = 0.5d0*(U(jxp,nn) - U(jxm,nn) + U(jyp,nn) - U(jym,nn))
+           a_jnn2  = a_jnn *a_jnn
+           a_jnnp2 = a_jnnp*a_jnnp
+
+           factor = fac*fac1*Xi_A1g*Xj_A1g
+           aspolaron_ij(i,j) = aspolaron_ij(i,j) + factor*(          &
+                                          s_inn2*s_jnnp2             &
+                                        - s_inn*s_jnn*s_innp*s_jnnp  &
+                                        + s_inn2*a_jnn2              &
+                                        - s_inn*a_jnn*s_innp*a_jnnp  &
+                                        + a_inn2*s_jnn2              &
+                                        - a_inn*s_jnn*a_innp*s_jnnp  &
+                                        + a_inn2*a_jnnp2             &
+                                        - a_inn*a_jnn*a_innp*a_jnnp )
+         enddo
+       enddo  !end loop jx, jy
+     enddo !end loop nnp
+    enddo  !end loop nn
+   enddo
+ enddo   !end loop ix, iy
+
+ antot = antot + ntot
+ anox  = anox  + nox
+ anoy  = anoy  + noy
+ anbis = anbis + nbis
+ anpa1g = anpa1g + npa1g
+
+ deallocate(work)
+
+ return
+ end subroutine do_measurements
+
+
+end module measurements

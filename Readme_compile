@@ -1,0 +1,29 @@
+compile with:
+
+ifort -O3 main.f90 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+
+debug:
+ifort -O3 -g -traceback -check all -fp-stack-check main.f90 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+ifort: warning #10182: disabling optimization; runtime debug checks enabled
+
+or
+
+ifort -debug -g main.f90 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+
+or
+
+ifort -O3 main.f90 -debug -g -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+
+If one wants to use 64-bit integer, compile the code with
+
+ifort -O3 main.f90 -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+
+Note the different between -lp64 and -ilp64
+
+is the size of the integers. in one case (ilp64) it is 64 bit while for lp64 it is 32.
+
+
+
+
+
+

@@ -1,0 +1,15 @@
+#!/bin/bash -l
+#
+#SBATCH --job-name="bismuth"
+#SBATCH --nodes=1
+#SBATCH --output=out.txt
+#SBATCH --error=err.txt
+
+date
+
+module purge
+module add intel
+
+srun -n 1 ./a.out
+
+date

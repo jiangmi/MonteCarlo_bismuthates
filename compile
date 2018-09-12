@@ -1,0 +1,2 @@
+module load intel
+ifort -O3 main.f90 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
