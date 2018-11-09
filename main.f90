@@ -14,13 +14,15 @@ use measurements
 implicit none
 integer nbeta, ii,jj,i,j, bin
 double precision mean, std
-double precision E
+double precision E, t1, t2
 double precision, dimension(:),   allocatable :: X
 double precision, dimension(:,:), allocatable :: H0
 call init_parameters()     ! set all the relevant parameters
 call allocate_quantities() ! set physical quantites
 500 format(a20,i7,a3,i7,a20,f8.5)
 600 format(a30,f8.5,a8,f8.5)
+
+call cpu_time(t1)
 
 print*, 'Enter a random seed for this run:'
 !read(5,*) iran
@@ -79,6 +81,9 @@ do nbeta = 0,num_beta_steps
 enddo
 
 call deallocate_quantities() 
+
+call cpu_time(t2)
+write (*,*) 'Elapsed CPU time = ', t2-t1
 
 stop
 end program main

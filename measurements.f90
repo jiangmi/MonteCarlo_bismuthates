@@ -133,24 +133,18 @@ contains
  double precision s_jnn, s_jnn2, s_jnnp, s_jnnp2 
  double precision tmp1, tmp2, tmp3
  double precision energy, fermi, fac, fermi1, fac1, factor
- double precision rtmp1, rtmp2
  double precision, dimension(0:N-1) :: X
  double precision, dimension(0:N-1) :: Ek
 
  cnt = cnt + 1
  call compute_total_E(energy,X)
  aenergy = aenergy + energy/N
- rtmp1 = 0.0d0
- rtmp2 = 0.0d0
  do i = Nbi,N-1
-  rtmp1 = rtmp1 + X(i)/(N-NBi)
-  rtmp2 = rtmp2 + X(i)*X(i)/(N-NBi)
+  aX  = aX  + X(i)/(N-NBi)
+  aX2 = aX2 + X(i)*X(i)/(N-NBi)
  enddo 
- aX2 = aX2 + rtmp2
- aX = aX + rtmp1
  
  !Measure the electronic quantities
-
  call get_H(U,X)
 
  lwork = 3*N-1
@@ -174,10 +168,13 @@ contains
    do nn = 0,N-1       
      fermi = 1.0d0/(exp(beta*(Ek(nn)-mu))+1.0d0)
      fac = 2.0d0*fermi/Nbi
-     anbis = anbis + fac*U(i,nn)*U(i,nn)
-     anox  = anox  + fac*U(ixp,nn)*U(ixp,nn)
-     anoy  = anoy  + fac*U(iyp,nn)*U(iyp,nn)
-     antot = antot + fac*(U(i,nn)*U(i,nn)+U(ixp,nn)*U(ixp,nn)+U(iyp,nn)*U(iyp,nn))
+     tmp1 = fac*U(i,nn)*U(i,nn)
+     tmp2 = fac*U(ixp,nn)*U(ixp,nn)
+     tmp3 = fac*U(iyp,nn)*U(iyp,nn)
+     anbis = anbis + tmp1
+     anox  = anox  + tmp2
+     anoy  = anoy  + tmp3
+     antot = antot + tmp1+tmp2+tmp3
 
      a_inn = 0.5d0*(U(ixp,nn) - U(ixm,nn) + U(iyp,nn) - U(iym,nn))
      s_inn = U(i,nn)
@@ -188,11 +185,11 @@ contains
 
      ! aspolaron does not need Nbi because of (i) index
      tmp1 = 2.0d0*fermi*(s_inn2 + a_inn2)
-    ! aspolaron(i) = aspolaron(i) + Xi_A1g*2.0d0*fermi*(s_inn2 + a_inn2)
+    ! aspolaron(i) = aspolaron(i) + Xi_A1g*tmp1
      aspolaron(i) = aspolaron(i) + tmp1
      asp_site_avg = asp_site_avg + tmp1/Nbi
 
-     ! double sum over eigenstates
+     ! second sum over eigenstates for bipolaron etc.
      do nnp = 0,N-1     
        fermi1 = 1.0d0/(exp(beta*(Ek(nnp)-mu))+1.0d0)
        fac1 = 2.0d0*fermi1/Nbi
@@ -217,6 +214,9 @@ contains
            jxm = return_index_for_coordinates(jx-1,jy  ,1)
            jyp = return_index_for_coordinates(jx  ,jy  ,1)
            jym = return_index_for_coordinates(jx  ,jy-1,1)
+
+           ! TODO: classify the vector j-i 
+
            Xj_A1g = 0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
            a_jnnp = 0.5d0*(U(jxp,nnp) - U(jxm,nnp) + U(jyp,nnp) - U(jym,nnp))
            a_jnn  = 0.5d0*(U(jxp,nn) - U(jxm,nn) + U(jyp,nn) - U(jym,nn))
