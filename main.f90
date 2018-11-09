@@ -31,11 +31,11 @@ allocate(H0(0:N-1,0:N-1))
 
 !Initialize the displacement to zero
 X = 0.0d0
-do i = 0,N-1
- if(.not.is_bismuth(i))then
-  X(i) = (ran2(iran)-0.50d0)*0.001d0
- endif
-enddo
+!do i = 0,N-1
+! if(.not.is_bismuth(i))then
+!  X(i) = (ran2(iran)-0.50d0)*0.001d0
+! endif
+!enddo
 
 ! Loop over temperature starting from highest T
 do nbeta = 0,num_beta_steps
@@ -47,7 +47,7 @@ do nbeta = 0,num_beta_steps
  accept = 0
  reject = 0
  do i = 1,nwarms
-  if(mod(i,nwarms/10).eq.0)then
+  if(mod(i,nwarms/ninv).eq.0)then
    print 500, 'Completed Warmup', i, 'of', nwarms, &
            'Accept ratio = ', dfloat(accept)/(dfloat(accept+reject))
    accept = 0

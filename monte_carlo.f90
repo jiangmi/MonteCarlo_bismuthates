@@ -1,6 +1,4 @@
 module monte_carlo
- integer, parameter :: nwarms = 10000
- integer, parameter :: nmeas = 10000
  integer accept, reject
 contains
  !=============================================================================
@@ -18,7 +16,8 @@ contains
  !sweep every site
  call compute_total_E(Eold,X)
  do site = NBi,N-1
-  deltaX = (ran2(iran)-0.5d0)*0.1d0
+  !deltaX = (ran2(iran)-0.5d0)*0.1d0
+  deltaX = 0.d0
   Xproposed = X
   Xproposed(site) = Xproposed(site) + deltaX
 
@@ -39,7 +38,7 @@ contains
  end subroutine single_site_sweep
  !=============================================================================
  subroutine get_H(H,X)
- use parameters, only: Norb, Nx, Ny, N, Nbi, tps, es, ep, d0
+ use parameters, only: Norb, Nx, Ny, N, Nbi, tps, es, ep, d0, if_X_displace
  use cluster, only: return_index_for_coordinates
  implicit none
  integer ix, iy, del, idx, i, ixp, ixm, iyp, iym
@@ -60,14 +59,14 @@ contains
    H(i,i) = es
    H(ixp,ixp) = ep
    H(iyp,iyp) = ep
-   H(i,ixp) =-tps/((1.0d0 + X(ixp)/d0)**(2.0d0))
-   H(i,iyp) =-tps/((1.0d0 + X(iyp)/d0)**(2.0d0))
-   H(i,ixm) = tps/((1.0d0 - X(ixm)/d0)**(2.0d0))
-   H(i,iym) = tps/((1.0d0 - X(iym)/d0)**(2.0d0))
-   H(ixp,i) =-tps/((1.0d0 + X(ixp)/d0)**(2.0d0))
-   H(iyp,i) =-tps/((1.0d0 + X(iyp)/d0)**(2.0d0))
-   H(ixm,i) = tps/((1.0d0 - X(ixm)/d0)**(2.0d0))
-   H(iym,i) = tps/((1.0d0 - X(iym)/d0)**(2.0d0))
+   H(i,ixp) =-tps/((1.0d0 + if_X_displace* X(ixp)/d0)**(2.0d0))
+   H(i,iyp) =-tps/((1.0d0 + if_X_displace* X(iyp)/d0)**(2.0d0))
+   H(i,ixm) = tps/((1.0d0 - if_X_displace* X(ixm)/d0)**(2.0d0))
+   H(i,iym) = tps/((1.0d0 - if_X_displace* X(iym)/d0)**(2.0d0))
+   H(ixp,i) =-tps/((1.0d0 + if_X_displace* X(ixp)/d0)**(2.0d0))
+   H(iyp,i) =-tps/((1.0d0 + if_X_displace* X(iyp)/d0)**(2.0d0))
+   H(ixm,i) = tps/((1.0d0 - if_X_displace* X(ixm)/d0)**(2.0d0))
+   H(iym,i) = tps/((1.0d0 - if_X_displace* X(iym)/d0)**(2.0d0))
   enddo
  enddo
 

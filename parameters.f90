@@ -8,6 +8,8 @@ module parameters
  integer N                               !total number of orbitals
  integer Nbi                             !total number of Bi orbitals
  integer num_beta_steps
+ integer nwarms, ninv, nmeas, nbin
+ integer if_X_displace                   ! No displacement for checking code
  double precision mu
  double precision tps                    !O-Bi overlap integral
  double precision ep                     !Oxygen 2p site energy
@@ -21,8 +23,8 @@ module parameters
 contains
  subroutine init_parameters()
  implicit none
- Nx = 4
- Ny = 4
+ Nx = 8
+ Ny = 8
  N = Nx*Ny*Norb
  NBi = Nx*Ny
  mu = -3.0d0
@@ -32,9 +34,16 @@ contains
  d0 = 1.8d0
  alpha = 0.d0!3000.0d0
  spring_const = 0.d0!100.d0
- beta_max = 10.0d0
+ if_X_displace = 0
+
+ beta_max = 1.0d0
  beta_min = 1.0d0
- num_beta_steps = 10
- return
+ num_beta_steps = 1
+
+ nwarms = 1
+ ninv = 1    ! print warmup progress per ninv steps
+ nmeas = 4 
+ nbin = 2
+return
  end subroutine init_parameters
 end module parameters

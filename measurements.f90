@@ -1,6 +1,6 @@
 module measurements
- integer, parameter :: nbin = 20
- integer nmeas0
+ use parameters, only: nbin
+ integer cnt  ! count the measurements in each bin
 
  ! accumulated quantites
  double precision aenergy, ax, ax2
@@ -11,20 +11,21 @@ module measurements
  double precision, dimension(:,:), allocatable :: aspolaron_ij
 
  !Below are for binned quantites
- double precision, dimension(1:nbin) :: benergy 
- double precision, dimension(1:nbin) :: bx
- double precision, dimension(1:nbin) :: bx2
- double precision, dimension(1:nbin) :: bnbis
- double precision, dimension(1:nbin) :: bntot
- double precision, dimension(1:nbin) :: bnox
- double precision, dimension(1:nbin) :: bnoy
- double precision, dimension(1:nbin) :: bnpa1g
+ double precision, dimension(:), allocatable  :: benergy 
+ double precision, dimension(:), allocatable  :: bx
+ double precision, dimension(:), allocatable  :: bx2
+ double precision, dimension(:), allocatable  :: bnbis
+ double precision, dimension(:), allocatable  :: bnox
+ double precision, dimension(:), allocatable  :: bnoy
+ double precision, dimension(:), allocatable  :: bntot
+ double precision, dimension(:), allocatable  :: bnpa1g
  double precision, dimension(:,:), allocatable :: bspolaron
  double precision, dimension(:,:), allocatable :: bbpolaron
  double precision, dimension(:,:,:), allocatable :: bspolaron_ij
 contains
  !=============================================================================
  subroutine get_err(bins,mean,std)
+ use parameters, only: nbin
  implicit none
  integer i
  double precision, dimension(1:nbin) :: bins
@@ -40,6 +41,14 @@ contains
  allocate(aspolaron(0:Nbi-1))
  allocate(abpolaron(0:Nbi-1))
  allocate(aspolaron_ij(0:Nbi-1,0:Nbi-1))
+ allocate(benergy(1:nbin))
+ allocate(bx(1:nbin))
+ allocate(bx2(1:nbin))
+ allocate(bnbis(1:nbin))
+ allocate(bnox(1:nbin))
+ allocate(bnoy(1:nbin))
+ allocate(bntot(1:nbin))
+ allocate(bnpa1g(1:nbin))
  allocate(bspolaron(1:nbin, 0:Nbi-1))
  allocate(bbpolaron(1:nbin, 0:Nbi-1))
  allocate(bspolaron_ij(1:nbin, 0:Nbi-1, 0:Nbi-1))
@@ -58,7 +67,7 @@ contains
  subroutine zero_accumulators()
  use parameters
  implicit none
- nmeas0 = 0
+ cnt = 0
  aenergy = 0.0d0
  aX = 0.0d0
  ax2 = 0.0d0
@@ -76,17 +85,17 @@ contains
  implicit none
  integer bin
  print*, 'Populating bin ', bin
- benergy(bin) = aenergy/dfloat(nmeas0)
- bX(bin) = aX/dfloat(nmeas0)
- bX2(bin) = aX2/dfloat(nmeas0)
- bntot(bin) = antot/dfloat(nmeas0)
- bnbis(bin) = anbis/dfloat(nmeas0)
- bnox(bin) = anox/dfloat(nmeas0)
- bnoy(bin) = anoy/dfloat(nmeas0)
- bnpa1g(bin) = anpa1g/dfloat(nmeas0)
- bspolaron(bin,:) = aspolaron/dfloat(nmeas0)
- bbpolaron(bin,:) = abpolaron/dfloat(nmeas0)
- bspolaron_ij(bin,:,:) = aspolaron_ij/dfloat(nmeas0)
+ benergy(bin) = aenergy/dfloat(cnt)
+ bX(bin) = aX/dfloat(cnt)
+ bX2(bin) = aX2/dfloat(cnt)
+ bntot(bin) = antot/dfloat(cnt)
+ bnbis(bin) = anbis/dfloat(cnt)
+ bnox(bin) = anox/dfloat(cnt)
+ bnoy(bin) = anoy/dfloat(cnt)
+ bnpa1g(bin) = anpa1g/dfloat(cnt)
+ bspolaron(bin,:) = aspolaron/dfloat(cnt)
+ bbpolaron(bin,:) = abpolaron/dfloat(cnt)
+ bspolaron_ij(bin,:,:) = aspolaron_ij/dfloat(cnt)
  return
  end subroutine populate_bins
  
@@ -117,9 +126,9 @@ contains
  double precision, dimension(0:N-1) :: X
  double precision, dimension(0:N-1) :: Ek
 
- nmeas0 = nmeas0 + 1
+ cnt = cnt + 1
  call compute_total_E(energy,X)
- aenergy = aenergy + energy
+ aenergy = aenergy + energy/N
  rtmp1 = 0.0d0
  rtmp2 = 0.0d0
  do i = Nbi,N-1
