@@ -126,7 +126,6 @@ contains
  integer lwork
  double precision, dimension(0:N-1,0:N-1) :: U
  double precision, allocatable, dimension(:) :: work
- double precision ntot, nbis, nox, noy, npa1g
  double precision Xi_A1g, Xj_A1g
  double precision a_inn, a_inn2, a_jnn, a_jnn2
  double precision a_innp, a_innp2, a_jnnp, a_jnnp2
@@ -161,12 +160,6 @@ contains
     print *,"dsyev error", N, lwork, info
  endif
 
- nox = 0.0d0
- noy = 0.0d0
- nbis = 0.0d0
- ntot = 0.0d0
- npa1g = 0.0d0
-
  !loop over Bi sites
  do ix = 0,Nx-1
   do iy = 0,Ny-1
@@ -181,17 +174,17 @@ contains
    do nn = 0,N-1       
      fermi = 1.0d0/(exp(beta*(Ek(nn)-mu))+1.0d0)
      fac = 2.0d0*fermi/Nbi
-     nbis = nbis + fac*U(i,nn)*U(i,nn)
-     nox  = nox  + fac*U(ixp,nn)*U(ixp,nn)
-     noy  = noy  + fac*U(iyp,nn)*U(iyp,nn)
-     ntot = ntot + fac*(U(i,nn)*U(i,nn)+U(ixp,nn)*U(ixp,nn)+U(iyp,nn)*U(iyp,nn))
+     anbis = anbis + fac*U(i,nn)*U(i,nn)
+     anox  = anox  + fac*U(ixp,nn)*U(ixp,nn)
+     anoy  = anoy  + fac*U(iyp,nn)*U(iyp,nn)
+     antot = antot + fac*(U(i,nn)*U(i,nn)+U(ixp,nn)*U(ixp,nn)+U(iyp,nn)*U(iyp,nn))
 
      a_inn = 0.5d0*(U(ixp,nn) - U(ixm,nn) + U(iyp,nn) - U(iym,nn))
      s_inn = U(i,nn)
      a_inn2 = a_inn*a_inn
      s_inn2 = s_inn*s_inn
 
-     npa1g = npa1g + fac*a_inn2
+     anpa1g = anpa1g + fac*a_inn2
 
      ! aspolaron does not need Nbi because of (i) index
      tmp1 = 2.0d0*fermi*(s_inn2 + a_inn2)
@@ -246,12 +239,6 @@ contains
     enddo  !end loop nn
    enddo
  enddo   !end loop ix, iy
-
- antot = antot + ntot
- anox  = anox  + nox
- anoy  = anoy  + noy
- anbis = anbis + nbis
- anpa1g = anpa1g + npa1g
 
  deallocate(work)
 
