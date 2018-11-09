@@ -23,15 +23,18 @@ write(unit=6,fmt=100) '  O(y) filling = ', mean, std
 call get_err(bnpa1g,mean,std)
 write(unit=6,fmt=100) '  A1g Oxygen holes = ', mean, std
 
-do ii = 0,Nbi-1
-  call get_err(bspolaron(:,ii),mean,std)
-  write(unit=6,fmt=200) 'site', ii, '  single polaron = ', mean, std
-enddo
+call get_err(bsp_site_avg,mean,std)
+write(unit=6,fmt=100) '  Site-average single polaron = ', mean, std
 
-do ii = 0,Nbi-1
-  call get_err(bbpolaron(:,ii),mean,std)
-  write(unit=6,fmt=200) 'site', ii, '  bipolaron = ', mean, std
-enddo
+!do ii = 0,Nbi-1
+!  call get_err(bspolaron(:,ii),mean,std)
+!  write(unit=6,fmt=200) 'site', ii, '  single polaron = ', mean, std
+!enddo
+
+!do ii = 0,Nbi-1
+!  call get_err(bbpolaron(:,ii),mean,std)
+!  write(unit=6,fmt=200) 'site', ii, '  bipolaron = ', mean, std
+!enddo
 
 !do ii = 0,Nbi-1
 !  do jj = 0,Nbi-1

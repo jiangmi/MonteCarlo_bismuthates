@@ -6,6 +6,7 @@ module measurements
  double precision aenergy, ax, ax2
  double precision antot, anbis, anox, anoy
  double precision anpa1g  !Number of oxygen holes with A1g symmetry
+ double precision asp_site_avg
  double precision, dimension(:), allocatable :: aspolaron
  double precision, dimension(:), allocatable :: abpolaron
  double precision, dimension(:,:), allocatable :: aspolaron_ij
@@ -19,6 +20,7 @@ module measurements
  double precision, dimension(:), allocatable  :: bnoy
  double precision, dimension(:), allocatable  :: bntot
  double precision, dimension(:), allocatable  :: bnpa1g
+ double precision, dimension(:), allocatable  :: bsp_site_avg
  double precision, dimension(:,:), allocatable :: bspolaron
  double precision, dimension(:,:), allocatable :: bbpolaron
  double precision, dimension(:,:,:), allocatable :: bspolaron_ij
@@ -49,6 +51,7 @@ contains
  allocate(bnoy(1:nbin))
  allocate(bntot(1:nbin))
  allocate(bnpa1g(1:nbin))
+ allocate(bsp_site_avg(1:nbin))
  allocate(bspolaron(1:nbin, 0:Nbi-1))
  allocate(bbpolaron(1:nbin, 0:Nbi-1))
  allocate(bspolaron_ij(1:nbin, 0:Nbi-1, 0:Nbi-1))
@@ -59,6 +62,7 @@ contains
  deallocate(aspolaron)
  deallocate(abpolaron)
  deallocate(aspolaron_ij)
+ deallocate(bsp_site_avg)
  deallocate(bspolaron)
  deallocate(bbpolaron)
  deallocate(bspolaron_ij)
@@ -76,6 +80,7 @@ contains
  anbis = 0.0d0
  antot = 0.0d0
  anpa1g = 0.0d0
+ asp_site_avg = 0.d0
  aspolaron = 0.0d0
  abpolaron = 0.0d0 
  aspolaron_ij = 0.0d0
@@ -93,6 +98,7 @@ contains
  bnox(bin) = anox/dfloat(cnt)
  bnoy(bin) = anoy/dfloat(cnt)
  bnpa1g(bin) = anpa1g/dfloat(cnt)
+ bsp_site_avg(bin) = asp_site_avg/dfloat(cnt)
  bspolaron(bin,:) = aspolaron/dfloat(cnt)
  bbpolaron(bin,:) = abpolaron/dfloat(cnt)
  bspolaron_ij(bin,:,:) = aspolaron_ij/dfloat(cnt)
@@ -184,6 +190,7 @@ contains
      ! aspolaron does not need Nbi because of (i) index
     ! aspolaron(i) = aspolaron(i) + Xi_A1g*2.0d0*fermi*(s_inn2 + a_inn2)
      aspolaron(i) = aspolaron(i) + 2.0d0*fermi*(s_inn2 + a_inn2)
+     asp_site_avg = asp_site_avg + 2.0d0*fermi*(s_inn2 + a_inn2)/Nbi
 
      ! double sum over eigenstates
      do nnp = 0,N-1     
