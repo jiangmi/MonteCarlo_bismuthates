@@ -7,8 +7,9 @@ module measurements
  double precision antot, anbis, anox, anoy
  double precision anpa1g  !Number of oxygen holes with A1g symmetry
  double precision asp_site_avg
- double precision, dimension(:), allocatable :: aspolaron
- double precision, dimension(:), allocatable :: abpolaron
+ double precision abp_site_avg
+ double precision, dimension(:), allocatable  :: aspolaron
+ double precision, dimension(:), allocatable  :: abpolaron
  double precision, dimension(:,:), allocatable :: aspolaron_ij
 
  !Below are for binned quantites
@@ -21,6 +22,7 @@ module measurements
  double precision, dimension(:), allocatable  :: bntot
  double precision, dimension(:), allocatable  :: bnpa1g
  double precision, dimension(:), allocatable  :: bsp_site_avg
+ double precision, dimension(:), allocatable  :: bbp_site_avg
  double precision, dimension(:,:), allocatable :: bspolaron
  double precision, dimension(:,:), allocatable :: bbpolaron
  double precision, dimension(:,:,:), allocatable :: bspolaron_ij
@@ -52,6 +54,7 @@ contains
  allocate(bntot(1:nbin))
  allocate(bnpa1g(1:nbin))
  allocate(bsp_site_avg(1:nbin))
+ allocate(bbp_site_avg(1:nbin))
  allocate(bspolaron(1:nbin, 0:Nbi-1))
  allocate(bbpolaron(1:nbin, 0:Nbi-1))
  allocate(bspolaron_ij(1:nbin, 0:Nbi-1, 0:Nbi-1))
@@ -63,6 +66,7 @@ contains
  deallocate(abpolaron)
  deallocate(aspolaron_ij)
  deallocate(bsp_site_avg)
+ deallocate(bbp_site_avg)
  deallocate(bspolaron)
  deallocate(bbpolaron)
  deallocate(bspolaron_ij)
@@ -81,6 +85,7 @@ contains
  antot = 0.0d0
  anpa1g = 0.0d0
  asp_site_avg = 0.d0
+ abp_site_avg = 0.d0
  aspolaron = 0.0d0
  abpolaron = 0.0d0 
  aspolaron_ij = 0.0d0
@@ -99,6 +104,7 @@ contains
  bnoy(bin) = anoy/dfloat(cnt)
  bnpa1g(bin) = anpa1g/dfloat(cnt)
  bsp_site_avg(bin) = asp_site_avg/dfloat(cnt)
+ bbp_site_avg(bin) = abp_site_avg/dfloat(cnt)
  bspolaron(bin,:) = aspolaron/dfloat(cnt)
  bbpolaron(bin,:) = abpolaron/dfloat(cnt)
  bspolaron_ij(bin,:,:) = aspolaron_ij/dfloat(cnt)
@@ -126,7 +132,7 @@ contains
  double precision a_innp, a_innp2, a_jnnp, a_jnnp2
  double precision s_inn, s_inn2, s_innp, s_innp2
  double precision s_jnn, s_jnn2, s_jnnp, s_jnnp2 
- double precision tmp1, tmp2
+ double precision tmp1, tmp2, tmp3
  double precision energy, fermi, fac, fermi1, fac1, factor
  double precision rtmp1, rtmp2
  double precision, dimension(0:N-1) :: X
@@ -188,9 +194,10 @@ contains
      npa1g = npa1g + fac*a_inn2
 
      ! aspolaron does not need Nbi because of (i) index
+     tmp1 = 2.0d0*fermi*(s_inn2 + a_inn2)
     ! aspolaron(i) = aspolaron(i) + Xi_A1g*2.0d0*fermi*(s_inn2 + a_inn2)
-     aspolaron(i) = aspolaron(i) + 2.0d0*fermi*(s_inn2 + a_inn2)
-     asp_site_avg = asp_site_avg + 2.0d0*fermi*(s_inn2 + a_inn2)/Nbi
+     aspolaron(i) = aspolaron(i) + tmp1
+     asp_site_avg = asp_site_avg + tmp1/Nbi
 
      ! double sum over eigenstates
      do nnp = 0,N-1     
@@ -202,8 +209,11 @@ contains
        a_innp2 = a_innp*a_innp
        s_innp2 = s_innp*s_innp
        
-       abpolaron(i) = abpolaron(i) + 2.0d0*fermi**fermi1* &!Xi_A1g*   &
-                        (a_inn2*s_innp2 + s_inn2*s_innp2 + a_inn2*a_innp2)
+       tmp1 = 2.0d0*fermi**fermi1* &!Xi_A1g*   &
+              (a_inn2*s_innp2 + s_inn2*s_innp2 + a_inn2*a_innp2)
+       abpolaron(i) = abpolaron(i) + tmp1
+       abp_site_avg = abp_site_avg + tmp1/Nbi
+
        !!!!!!!!!!!!!!!!!!!!!!!!!!
        !!       <L_i*L_j>      !!
        !!!!!!!!!!!!!!!!!!!!!!!!!!
