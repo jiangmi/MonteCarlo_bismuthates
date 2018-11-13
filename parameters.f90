@@ -7,6 +7,7 @@ module parameters
  integer, parameter :: Norb = 3          !number of orbitals in the basis
  integer N                               !total number of orbitals
  integer Nbi                             !total number of Bi orbitals
+ integer nclass                          !number of distance class
  integer num_beta_steps
  integer nwarms, ninv, nmeas, nbin
  integer if_X_displace                   ! No displacement for checking code
@@ -25,10 +26,11 @@ module parameters
 contains
  subroutine init_parameters()
  implicit none
- Nx = 2
- Ny = 2
+ Nx = 4
+ Ny = 4
  N = Nx*Ny*Norb
  NBi = Nx*Ny
+ nclass = (Nx/2+1)*(Ny/2+1)
  mu = -3.0d0
  es = -2.0d0
  ep = -6.0d0
@@ -42,10 +44,10 @@ contains
  beta_min = 1.0d0
  num_beta_steps = 9
 
- nwarms = 10
+ nwarms = 2000
  ninv = 10    ! print warmup progress per ninv steps
- nmeas = 10 
- nbin = 2
+ nmeas = 5000 
+ nbin = 10
 
  !======================================================
  ! Initialize files for recording results VS temperature
@@ -55,8 +57,8 @@ contains
  write(s4,'(f4.1)') ep
  write(s5,'(f3.1)') tps
  write(s6,'(f3.1)') d0
- write(s7,'(i2)') nwarms
- write(s8,'(i2)') nmeas
+ write(s7,'(i4)') nwarms
+ write(s8,'(i4)') nmeas
  fname = 'Nx'//adjustl(trim(s1))//'_mu'//adjustl(trim(s2))//'_es'//adjustl(trim(s3))//'_ep'//adjustl(trim(s4)) &
          //'_tps'//adjustl(trim(s5))//'_d0'//adjustl(trim(s6))//'_nwarm'//adjustl(trim(s7))//'_nmeas'//adjustl(trim(s8))//'.txt'
  !write(*,*) fname

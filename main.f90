@@ -12,12 +12,13 @@ use cluster
 use monte_carlo
 use measurements
 implicit none
-integer nbeta, ii,jj,i,j, bin
+integer nbeta, ii,jj,i,j,k, bin
 double precision mean, std
 double precision E, t1, t2
 double precision, dimension(:),   allocatable :: X
 double precision, dimension(:,:), allocatable :: H0
 call init_parameters()     ! set all the relevant parameters
+call get_distance_class()  ! classify distance in cluster.f90
 call allocate_quantities() ! set physical quantites
 500 format(a20,i7,a3,i7,a20,f8.5)
 600 format(a30,f8.5,a8,f8.5)

@@ -1,9 +1,10 @@
 ! The order of N orbitals is:
 ! first 0:NBi-1 is bismuth and then px orbital and finally py orbital 
-! N = Nx*Ny*Norb
-! NBi = Nx*Ny
+! N = Nx*Ny*Norb; NBi = Nx*Ny
 module cluster 
- use parameters, only: N, Nx, Ny, Nbi
+ use parameters, only: N, Nx, Ny, Nbi, nclass
+ integer, dimension(:,:), allocatable :: dclass  
+ integer, dimension(:),   allocatable :: dclass_F
 contains
  
  !=============================================================================
@@ -47,4 +48,66 @@ contains
  endif
  return
  end function is_bismuth
+ !=============================================================================
+ subroutine get_distance_class()
+ ! Obtain the distance_class for two unit cell origins (Bi atoms)
+ implicit none
+ integer dx, dy, ix,iy,jx,jy,i,j,k,cnt
+ allocate(dclass(0:Nbi-1,0:Nbi-1))
+ allocate(dclass_F(0:nclass-1))
+ dclass = 0
+ dclass_F = 0
+ cnt = 0
+
+ do ix = 0,Nx-1
+  do iy = 0,Ny-1
+   i = return_index_for_coordinates(ix,iy,0)
+   do jx = 0,Nx-1
+    do jy = 0,Ny-1
+     j = return_index_for_coordinates(jx,jy,0)
+
+     dx = abs(ix-jx)
+     if (dx>Nx/2) then
+       dx = Nx-dx
+     endif
+     dy = abs(iy-jy)
+     if (dy>Nx/2) then
+       dy = Nx-dy
+     endif
+
+     ! set additional symmetry (dx,dy)=(dy,dx)
+     !if (dx<dy) then
+     !  k = dx
+     !  dx = dy
+     !  dy = k
+     !endif
+
+     k = get_index(dx,dy)
+     dclass(i,j) = k
+     dclass_F(k) = dclass_F(k)+1
+    enddo
+   enddo
+  enddo
+ enddo
+
+ do i = 0,Nbi-1
+  do j = 0,Nbi-1
+   
+  enddo
+ enddo
+ return
+ end subroutine get_distance_class
+ !=============================================================================                       
+ ! get a unique integer to identify a distance class      
+ ! (i,j) labels distance = (dx,dy) between sites                                 
+ integer function get_index(i,j)                                                 
+ implicit none 
+ integer i, j
+ if(i>Nx/2 .or. j>Ny/2)then                                                                                     
+  print*, 'Distance vector between two sites exceeds half lattice size!'                          
+  stop                                                                                                
+ endif     
+ get_index = i + j*(Nx/2+1)                                             
+ return    
+ end function get_index
 end module cluster 

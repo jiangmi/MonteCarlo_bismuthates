@@ -43,9 +43,9 @@ write(unit=13,fmt=800) beta, mean, std
 !  write(unit=6,fmt=200) 'site', ii, '  bipolaron = ', mean, std
 !enddo
 
-!do ii = 0,Nbi-1
-!  do jj = 0,Nbi-1
-!    call get_err(bspolaron_ij(:,ii,jj),mean,std)
-!    write(unit=6,fmt=300) 'site', ii, jj, '  <L_i*L_j> = ', mean, std
-!  enddo
-!enddo
+do k = 0,nclass-1
+  call get_err(bspolaron_ij(:,k),mean,std)
+  i = mod(k,(Nx/2+1))
+  j = k/(Nx/2+1)
+  write(unit=6,fmt=300) 'site', i, j, '  <L_i*L_j> = ', mean, std
+enddo

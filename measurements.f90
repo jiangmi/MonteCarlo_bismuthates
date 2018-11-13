@@ -10,7 +10,7 @@ module measurements
  double precision abp_site_avg
  double precision, dimension(:), allocatable  :: aspolaron
  double precision, dimension(:), allocatable  :: abpolaron
- double precision, dimension(:,:), allocatable :: aspolaron_ij
+ double precision, dimension(:), allocatable  :: aspolaron_ij
 
  !Below are for binned quantites
  double precision, dimension(:), allocatable  :: benergy 
@@ -25,7 +25,7 @@ module measurements
  double precision, dimension(:), allocatable  :: bbp_site_avg
  double precision, dimension(:,:), allocatable :: bspolaron
  double precision, dimension(:,:), allocatable :: bbpolaron
- double precision, dimension(:,:,:), allocatable :: bspolaron_ij
+ double precision, dimension(:,:), allocatable :: bspolaron_ij
 contains
  !=============================================================================
  subroutine get_err(bins,mean,std)
@@ -44,7 +44,7 @@ contains
  implicit none
  allocate(aspolaron(0:Nbi-1))
  allocate(abpolaron(0:Nbi-1))
- allocate(aspolaron_ij(0:Nbi-1,0:Nbi-1))
+ allocate(aspolaron_ij(0:nclass-1))
  allocate(benergy(1:nbin))
  allocate(bx(1:nbin))
  allocate(bx2(1:nbin))
@@ -57,7 +57,7 @@ contains
  allocate(bbp_site_avg(1:nbin))
  allocate(bspolaron(1:nbin, 0:Nbi-1))
  allocate(bbpolaron(1:nbin, 0:Nbi-1))
- allocate(bspolaron_ij(1:nbin, 0:Nbi-1, 0:Nbi-1))
+ allocate(bspolaron_ij(1:nbin, 0:nclass-1))
  end subroutine allocate_quantities
  !=============================================================================
  subroutine deallocate_quantities()
@@ -107,7 +107,7 @@ contains
  bbp_site_avg(bin) = abp_site_avg/dfloat(cnt)
  bspolaron(bin,:) = aspolaron/dfloat(cnt)
  bbpolaron(bin,:) = abpolaron/dfloat(cnt)
- bspolaron_ij(bin,:,:) = aspolaron_ij/dfloat(cnt)
+ bspolaron_ij(bin,:) = aspolaron_ij/dfloat(cnt)
  return
  end subroutine populate_bins
  
@@ -116,13 +116,13 @@ contains
  !============================================================================
  subroutine do_measurements(X)
  use parameters
- use cluster, only: return_index_for_coordinates
+ use cluster, only: return_index_for_coordinates, dclass, dclass_F
  use monte_carlo, only: compute_total_E, get_H
  implicit none
  integer ix, iy, jx, jy, tau, nn, nnp, mm, nnn
  integer ixp, iyp, ixm, iym
  integer jxp, jyp, jxm, jym
- integer i, j, info
+ integer i, j, k, info
  integer lwork
  double precision, dimension(0:N-1,0:N-1) :: U
  double precision, allocatable, dimension(:) :: work
@@ -191,6 +191,9 @@ contains
 
      ! second sum over eigenstates for bipolaron etc.
      do nnp = 0,N-1     
+       !!!!!!!!!!!!!!!!!!!!!!!!!!
+       !!       bipolaron      !!
+       !!!!!!!!!!!!!!!!!!!!!!!!!!
        fermi1 = 1.0d0/(exp(beta*(Ek(nnp)-mu))+1.0d0)
        fac1 = 2.0d0*fermi1/Nbi
 
@@ -199,7 +202,7 @@ contains
        a_innp2 = a_innp*a_innp
        s_innp2 = s_innp*s_innp
        
-       tmp1 = 2.0d0*fermi**fermi1* &!Xi_A1g*   &
+       tmp1 = 2.0d0*fermi**fermi1* Xi_A1g*   &
               (a_inn2*s_innp2 + s_inn2*s_innp2 + a_inn2*a_innp2)
        abpolaron(i) = abpolaron(i) + tmp1
        abp_site_avg = abp_site_avg + tmp1/Nbi
@@ -215,7 +218,7 @@ contains
            jyp = return_index_for_coordinates(jx  ,jy  ,1)
            jym = return_index_for_coordinates(jx  ,jy-1,1)
 
-           ! TODO: classify the vector j-i 
+           k = dclass(i,j)
 
            Xj_A1g = 0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
            a_jnnp = 0.5d0*(U(jxp,nnp) - U(jxm,nnp) + U(jyp,nnp) - U(jym,nnp))
@@ -223,16 +226,16 @@ contains
            a_jnn2  = a_jnn *a_jnn
            a_jnnp2 = a_jnnp*a_jnnp
 
-           factor = fac*fac1*Xi_A1g*Xj_A1g
-           aspolaron_ij(i,j) = aspolaron_ij(i,j) + factor*(          &
-                                          s_inn2*s_jnnp2             &
-                                        - s_inn*s_jnn*s_innp*s_jnnp  &
-                                        + s_inn2*a_jnn2              &
-                                        - s_inn*a_jnn*s_innp*a_jnnp  &
-                                        + a_inn2*s_jnn2              &
-                                        - a_inn*s_jnn*a_innp*s_jnnp  &
-                                        + a_inn2*a_jnnp2             &
-                                        - a_inn*a_jnn*a_innp*a_jnnp )
+           factor = fac*fac1*Xi_A1g*Xj_A1g/dclass_F(k)
+           aspolaron_ij(k) = aspolaron_ij(k) + factor*(          &
+                                      s_inn2*s_jnnp2             &
+                                    - s_inn*s_jnn*s_innp*s_jnnp  &
+                                    + s_inn2*a_jnn2              &
+                                    - s_inn*a_jnn*s_innp*a_jnnp  &
+                                    + a_inn2*s_jnn2              &
+                                    - a_inn*s_jnn*a_innp*s_jnnp  &
+                                    + a_inn2*a_jnnp2             &
+                                    - a_inn*a_jnn*a_innp*a_jnnp )
          enddo
        enddo  !end loop jx, jy
      enddo !end loop nnp
