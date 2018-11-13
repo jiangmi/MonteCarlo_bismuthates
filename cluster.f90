@@ -76,15 +76,17 @@ contains
      endif
 
      ! set additional symmetry (dx,dy)=(dy,dx)
-     !if (dx<dy) then
-     !  k = dx
-     !  dx = dy
-     !  dy = k
-     !endif
+     if (dx<dy) then
+       k = dx
+       dx = dy
+       dy = k
+     endif
 
      k = get_index(dx,dy)
      dclass(i,j) = k
-     dclass_F(k) = dclass_F(k)+1
+
+     ! Note for k = get_index(dx,dy) with dx<dy, dclass_F(k)=0
+     dclass_F(k) = dclass_F(k)+1 
     enddo
    enddo
   enddo

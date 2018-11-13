@@ -44,8 +44,10 @@ write(unit=13,fmt=800) beta, mean, std
 !enddo
 
 do k = 0,nclass-1
-  call get_err(bspolaron_ij(:,k),mean,std)
-  i = mod(k,(Nx/2+1))
-  j = k/(Nx/2+1)
-  write(unit=6,fmt=300) 'site', i, j, '  <L_i*L_j> = ', mean, std
+  if (dclass_F(k)/=0) then
+    call get_err(bspolaron_ij(:,k),mean,std)
+    i = mod(k,(Nx/2+1))
+    j = k/(Nx/2+1)
+    write(unit=6,fmt=300) 'site', i, j, '  <L_i*L_j> = ', mean, std
+  endif
 enddo
