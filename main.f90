@@ -41,7 +41,7 @@ do i = 0,N-1
 enddo
 
 ! Loop over temperature starting from highest T
-do nbeta = 0,num_beta_steps
+do nbeta = 0,0!num_beta_steps
  beta = beta_min + dfloat(nbeta)*(beta_max-beta_min)/dfloat(num_beta_steps)
  print*, '  '
  print 600, 'Carrying out MC for beta = ', beta, 'T = ', 1./beta

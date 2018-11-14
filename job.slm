@@ -10,6 +10,7 @@ date
 module purge
 module add intel
 
+source compile
 srun -n 1 ./a.out
 
 date

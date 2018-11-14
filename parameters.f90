@@ -26,8 +26,8 @@ module parameters
 contains
  subroutine init_parameters()
  implicit none
- Nx = 4
- Ny = 4
+ Nx = 6
+ Ny = 6
  N = Nx*Ny*Norb
  NBi = Nx*Ny
  nclass = (Nx/2+1)*(Ny/2+1)
@@ -41,12 +41,12 @@ contains
  if_X_displace = 1
 
  beta_max = 10.0d0
- beta_min = 1.0d0
- num_beta_steps = 9
+ beta_min = 10.0d0
+ num_beta_steps = 1
 
- nwarms = 2000
+ nwarms = 1000
  ninv = 10    ! print warmup progress per ninv steps
- nmeas = 5000 
+ nmeas = 3000 
  nbin = 10
 
  !======================================================

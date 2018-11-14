@@ -91,12 +91,6 @@ contains
    enddo
   enddo
  enddo
-
- do i = 0,Nbi-1
-  do j = 0,Nbi-1
-   
-  enddo
- enddo
  return
  end subroutine get_distance_class
  !=============================================================================                       
