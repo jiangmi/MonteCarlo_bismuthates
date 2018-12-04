@@ -13,6 +13,7 @@ module parameters
  integer if_X_displace                   ! No displacement for checking code
  double precision mu
  double precision tps                    !O-Bi overlap integral
+ double precision tpp                    !O-O overlap integral
  double precision ep                     !Oxygen 2p site energy
  double precision es                     !Bi 6s site energy
  double precision beta
@@ -26,27 +27,28 @@ module parameters
 contains
  subroutine init_parameters()
  implicit none
- Nx = 6
- Ny = 6
+ Nx = 4
+ Ny = 4
  N = Nx*Ny*Norb
  NBi = Nx*Ny
  nclass = (Nx/2+1)*(Ny/2+1)
- mu = -3.0d0
- es = -2.0d0
- ep = -6.0d0
- tps = 1.6d0!0.0d0
- d0 = 1.8d0
+ mu = 8.0d0
+ es = 6.42d0
+ ep = 2.42d0
+ tps = 2.08d0!0.0d0
+ tpp = 0.056d0
+ d0 = 1.0d0
  alpha = 3000.0d0
  spring_const = 100.d0
  if_X_displace = 1
 
  beta_max = 10.0d0
  beta_min = 10.0d0
- num_beta_steps = 1
+ num_beta_steps = 10
 
  nwarms = 1000
  ninv = 10    ! print warmup progress per ninv steps
- nmeas = 3000 
+ nmeas = 5000 
  nbin = 10
 
  !======================================================

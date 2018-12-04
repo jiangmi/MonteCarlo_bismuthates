@@ -41,10 +41,11 @@ contains
  end subroutine single_site_sweep
  !=============================================================================
  subroutine get_H(H,X)
- use parameters, only: Norb, Nx, Ny, N, Nbi, tps, es, ep, d0, if_X_displace
+ use parameters, only: Norb, Nx, Ny, N, Nbi, tps, tpp, es, ep, d0, if_X_displace
  use cluster, only: return_index_for_coordinates
  implicit none
  integer ix, iy, del, idx, i, ixp, ixm, iyp, iym
+ integer ixpy, iymy, ixpymy, iypx, ixmx, ixmymx
  double precision, dimension(0:N-1) :: X
  double precision, dimension(0:N-1,0:N-1) :: H
 
@@ -70,6 +71,31 @@ contains
    H(iyp,i) =-tps/((1.0d0 + if_X_displace* X(iyp)/d0)**(2.0d0))
    H(ixm,i) = tps/((1.0d0 - if_X_displace* X(ixm)/d0)**(2.0d0))
    H(iym,i) = tps/((1.0d0 - if_X_displace* X(iym)/d0)**(2.0d0))
+
+   ! set tpp for px orbital:
+   ixpy = return_index_for_coordinates(ix+1,iy,2)
+   iymy = return_index_for_coordinates(ix,iy-1,2)
+   ixpymy = return_index_for_coordinates(ix+1,iy-1,2)
+   H(ixp,ixpy)   =-tpp
+   H(ixp,iyp)    = tpp
+   H(ixp,iymy)   =-tpp
+   H(ixp,ixpymy) = tpp
+   H(ixpy,ixp)   =-tpp
+   H(iyp, ixp)   = tpp
+   H(iymy,ixp)   =-tpp
+   H(ixpymy,ixp) = tpp
+   ! set tpp for py orbital:
+   iypx = return_index_for_coordinates(ix,iy+1,1)
+   ixmx = return_index_for_coordinates(ix-1,iy,1)
+   ixmymx = return_index_for_coordinates(ix-1,iy-1,1)
+   H(iyp,iypx)   =-tpp
+   H(iyp,ixmymx) = tpp
+   H(iyp,ixmx)   =-tpp
+   H(iyp,ixp)    = tpp
+   H(iypx,  iyp) =-tpp
+   H(ixmymx,iyp) = tpp
+   H(ixmx,  iyp) =-tpp
+   H(ixp,   iyp) = tpp
   enddo
  enddo
 
