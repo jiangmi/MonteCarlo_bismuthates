@@ -42,20 +42,20 @@ contains
  spring_const = springval
  if_X_displace = 1
 
- beta_max = 10.0d0
- beta_min = 10.0d0
- num_beta_steps = 1
+ beta_max = bemaxval
+ beta_min = beminval
+ num_beta_steps = nbetaval
 
- nwarms = 1000
- ninv = 10    ! print warmup progress per ninv steps
- nmeas = 5000 
- nbin = 10
+ nwarms = nwarmval
+ ninv = ninvval    ! print warmup progress per ninv steps
+ nmeas = nmeasval 
+ nbin = nbinval
 
  !======================================================
  ! Initialize files for recording results VS temperature
- open(unit=11,file='E_'//'fnameval'//'.txt',status="replace")
- open(unit=12,file='sp_'//'fnameval'//'.txt',status="replace")
- open(unit=13,file='bp_'//'fnameval'//'.txt',status="replace")
+ open(unit=11,file='dirval'//'/E_'//'fnameval'//'.txt',status="replace")
+ open(unit=12,file='dirval'//'/sp_'//'fnameval'//'.txt',status="replace")
+ open(unit=13,file='dirval'//'/bp_'//'fnameval'//'.txt',status="replace")
 
  return
  end subroutine init_parameters
