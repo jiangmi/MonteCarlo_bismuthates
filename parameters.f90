@@ -12,7 +12,7 @@ module parameters
  integer nwarms, ninv, nmeas, nbin
  integer if_X_displace                   ! No displacement for checking code
  double precision mu
- double precision tps                    !O-Bi overlap integral
+ double precision tsp                    !O-Bi overlap integral
  double precision tpp                    !O-O overlap integral
  double precision ep                     !Oxygen 2p site energy
  double precision es                     !Bi 6s site energy
@@ -32,19 +32,19 @@ contains
  N = Nx*Ny*Norb
  NBi = Nx*Ny
  nclass = (Nx/2+1)*(Ny/2+1)
- mu = 8.0d0
- es = 6.42d0
- ep = 2.42d0
- tps = 2.08d0!0.0d0
- tpp = 0.056d0
+ mu = 9.0
+ es = 6.42
+ ep = 2.42
+ tsp = 2.08
+ tpp = 0.056
  d0 = 1.0d0
- alpha = 3000.0d0
- spring_const = 100.d0
+ alpha = 300
+ spring_const = 10
  if_X_displace = 1
 
  beta_max = 10.0d0
  beta_min = 10.0d0
- num_beta_steps = 10
+ num_beta_steps = 1
 
  nwarms = 1000
  ninv = 10    ! print warmup progress per ninv steps
@@ -53,20 +53,9 @@ contains
 
  !======================================================
  ! Initialize files for recording results VS temperature
- write(s1,'(i1)') Nx
- write(s2,'(f4.1)') mu
- write(s3,'(f4.1)') es
- write(s4,'(f4.1)') ep
- write(s5,'(f3.1)') tps
- write(s6,'(f3.1)') d0
- write(s7,'(i4)') nwarms
- write(s8,'(i4)') nmeas
- fname = 'Nx'//adjustl(trim(s1))//'_mu'//adjustl(trim(s2))//'_es'//adjustl(trim(s3))//'_ep'//adjustl(trim(s4)) &
-         //'_tps'//adjustl(trim(s5))//'_d0'//adjustl(trim(s6))//'_nwarm'//adjustl(trim(s7))//'_nmeas'//adjustl(trim(s8))//'.txt'
- !write(*,*) fname
- open(unit=11,file='E_'//fname,status="replace")
- open(unit=12,file='sp_'//fname,status="replace")
- open(unit=13,file='bp_'//fname,status="replace")
+ open(unit=11,file='E_'//'Nx4_mu9.0_es6.42_ep2.42_tsp2.08_tpp0.056_alpha300_c10'//'.txt',status="replace")
+ open(unit=12,file='sp_'//'Nx4_mu9.0_es6.42_ep2.42_tsp2.08_tpp0.056_alpha300_c10'//'.txt',status="replace")
+ open(unit=13,file='bp_'//'Nx4_mu9.0_es6.42_ep2.42_tsp2.08_tpp0.056_alpha300_c10'//'.txt',status="replace")
 
  return
  end subroutine init_parameters

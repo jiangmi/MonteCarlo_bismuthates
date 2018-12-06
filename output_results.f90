@@ -4,6 +4,12 @@
 300 format(a6, i3, ' ', i3, a30, ' ',f8.5,' +- ',f8.5)
 800 format(f4.1,'  ',f10.5,'  ',f8.5)
 
+!print parameters
+!write(unit=6,(a10,i3)) 'Nx = Ny = ', Nx
+!write(unit=6,(a10,f4.1)) 'mu = ', mu
+!write(unit=11,(a10,i3)) 'Nx = Ny = ', Nx
+!write(unit=11,(a10,f4.1)) 'mu = ', mu
+
 !code to output the results
 call get_err(benergy,mean,std)
 write(unit=6,fmt=100) '  E_avg = ', mean, std
@@ -42,7 +48,7 @@ write(unit=13,fmt=800) beta, mean, std
 !  call get_err(bbpolaron(:,ii),mean,std)
 !  write(unit=6,fmt=200) 'site', ii, '  bipolaron = ', mean, std
 !enddo
-
+!
 do k = 0,nclass-1
   if (dclass_F(k)/=0) then
     call get_err(bspolaron_ij(:,k),mean,std)

@@ -184,7 +184,7 @@ contains
      anpa1g = anpa1g + fac*a_inn2
 
      ! aspolaron does not need Nbi because of (i) index
-     tmp1 = 2.0d0*fermi*(s_inn2 + a_inn2)
+     tmp1 = 2.0d0*fermi*Xi_A1g*(s_inn2 + a_inn2)
     ! aspolaron(i) = aspolaron(i) + Xi_A1g*tmp1
      aspolaron(i) = aspolaron(i) + tmp1
      asp_site_avg = asp_site_avg + tmp1/Nbi
@@ -202,8 +202,8 @@ contains
        a_innp2 = a_innp*a_innp
        s_innp2 = s_innp*s_innp
        
-       tmp1 = 2.0d0*fermi**fermi1* Xi_A1g*   &
-              (a_inn2*s_innp2 + s_inn2*s_innp2 + a_inn2*a_innp2)
+       tmp1 = fermi**fermi1* Xi_A1g*   &
+              (2.0d0*a_inn2*s_innp2 + s_inn2*s_innp2 + a_inn2*a_innp2)
        abpolaron(i) = abpolaron(i) + tmp1
        abp_site_avg = abp_site_avg + tmp1/Nbi
 

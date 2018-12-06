@@ -17,7 +17,7 @@ contains
  call compute_total_E(Eold,X)
  do site = NBi,N-1
   if (if_X_displace==1) then
-    deltaX = (ran2(iran)-0.5d0)*0.1d0
+    deltaX = (ran2(iran)-0.5d0)*0.2d0
   else
     deltaX = 0.d0
   endif
@@ -41,7 +41,7 @@ contains
  end subroutine single_site_sweep
  !=============================================================================
  subroutine get_H(H,X)
- use parameters, only: Norb, Nx, Ny, N, Nbi, tps, tpp, es, ep, d0, if_X_displace
+ use parameters, only: Norb, Nx, Ny, N, Nbi, tsp, tpp, es, ep, d0, if_X_displace
  use cluster, only: return_index_for_coordinates
  implicit none
  integer ix, iy, del, idx, i, ixp, ixm, iyp, iym
@@ -63,14 +63,14 @@ contains
    H(i,i) = es
    H(ixp,ixp) = ep
    H(iyp,iyp) = ep
-   H(i,ixp) =-tps/((1.0d0 + if_X_displace* X(ixp)/d0)**(2.0d0))
-   H(i,iyp) =-tps/((1.0d0 + if_X_displace* X(iyp)/d0)**(2.0d0))
-   H(i,ixm) = tps/((1.0d0 - if_X_displace* X(ixm)/d0)**(2.0d0))
-   H(i,iym) = tps/((1.0d0 - if_X_displace* X(iym)/d0)**(2.0d0))
-   H(ixp,i) =-tps/((1.0d0 + if_X_displace* X(ixp)/d0)**(2.0d0))
-   H(iyp,i) =-tps/((1.0d0 + if_X_displace* X(iyp)/d0)**(2.0d0))
-   H(ixm,i) = tps/((1.0d0 - if_X_displace* X(ixm)/d0)**(2.0d0))
-   H(iym,i) = tps/((1.0d0 - if_X_displace* X(iym)/d0)**(2.0d0))
+   H(i,ixp) =-tsp/((1.0d0 + if_X_displace* X(ixp)/d0)**(2.0d0))
+   H(i,iyp) =-tsp/((1.0d0 + if_X_displace* X(iyp)/d0)**(2.0d0))
+   H(i,ixm) = tsp/((1.0d0 - if_X_displace* X(ixm)/d0)**(2.0d0))
+   H(i,iym) = tsp/((1.0d0 - if_X_displace* X(iym)/d0)**(2.0d0))
+   H(ixp,i) =-tsp/((1.0d0 + if_X_displace* X(ixp)/d0)**(2.0d0))
+   H(iyp,i) =-tsp/((1.0d0 + if_X_displace* X(iyp)/d0)**(2.0d0))
+   H(ixm,i) = tsp/((1.0d0 - if_X_displace* X(ixm)/d0)**(2.0d0))
+   H(iym,i) = tsp/((1.0d0 - if_X_displace* X(iym)/d0)**(2.0d0))
 
    ! set tpp for px orbital:
    ixpy = return_index_for_coordinates(ix+1,iy,2)
