@@ -18,13 +18,13 @@ ep = 2.42
 tsp = 2.08 
 tpp = 0.056
 
-beta_max = 5.0
-beta_min = 5.0
-num_beta_steps = 1
+beta_max = 10.0
+beta_min = 1.0
+num_beta_steps = 9
 
-nwarm = 1000
+nwarm = 2000
 ninv = 10    # print warmup progress per ninv steps
-nmeas = 5000
+nmeas = 10000
 nbin = 10
 alpha = 300
 spring_const = 10

@@ -13,7 +13,7 @@ use monte_carlo
 use measurements
 implicit none
 integer nbeta, ii,jj,i,j,k, bin
-double precision mean, std
+double precision mean,std,Emean,Estd,Nmean,Nstd,spmean,spstd,bpmean,bpstd
 double precision E, t1, t2
 double precision, dimension(:),   allocatable :: X
 double precision, dimension(:,:), allocatable :: H0
@@ -41,7 +41,7 @@ do i = 0,N-1
 enddo
 
 ! Loop over temperature starting from highest T
-do nbeta = 0,0!num_beta_steps
+do nbeta = 0,num_beta_steps
  beta = beta_min + dfloat(nbeta)*(beta_max-beta_min)/dfloat(num_beta_steps)
  print*, '  '
  print 600, 'Carrying out MC for beta = ', beta, 'T = ', 1./beta

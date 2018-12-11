@@ -53,9 +53,9 @@ contains
 
  !======================================================
  ! Initialize files for recording results VS temperature
- open(unit=11,file='dirval'//'/E_'//'fnameval'//'.txt',status="replace")
- open(unit=12,file='dirval'//'/sp_'//'fnameval'//'.txt',status="replace")
- open(unit=13,file='dirval'//'/bp_'//'fnameval'//'.txt',status="replace")
+ 500 format(a80)
+ open(unit=11,file='dirval'//'/data_'//'fnameval'//'.txt',status="replace")
+ write(unit=11,fmt=500) 'beta    n_avg    n_err    E_avg    E_err    sp_avg    sp_err    bp_avg    bp_err'
 
  return
  end subroutine init_parameters
