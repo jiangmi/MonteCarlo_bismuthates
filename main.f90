@@ -34,11 +34,13 @@ allocate(H0(0:N-1,0:N-1))
 
 !Initialize the displacement to zero and then a small value
 X = 0.0d0
-do i = 0,N-1
- if(.not.is_bismuth(i))then
-  X(i) = (ran2(iran)-0.50d0)*0.001d0
- endif
-enddo
+if (if_X_displace==1) then
+  do i = 0,N-1
+   if(.not.is_bismuth(i))then
+    X(i) = (ran2(iran)-0.50d0)*0.001d0
+   endif
+  enddo
+endif
 
 ! Loop over temperature starting from highest T
 do nbeta = 0,num_beta_steps

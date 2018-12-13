@@ -2,8 +2,8 @@
 #
 #SBATCH --job-name="bismuth"
 #SBATCH --nodes=1
-#SBATCH --output=out_Nx4_mu9.0_es6.42_ep2.42_tsp2.08_tpp0.056_alpha300_c10.txt
-#SBATCH --error=err_Nx4_mu9.0_es6.42_ep2.42_tsp2.08_tpp0.056_alpha300_c10.txt
+#SBATCH --output=out_Nx4_mu7.9_es6.42_ep2.42_tsp2.08_tpp0.056_alpha300_c10.txt
+#SBATCH --error=err_Nx4_mu7.9_es6.42_ep2.42_tsp2.08_tpp0.056_alpha300_c10.txt
 
 date
 

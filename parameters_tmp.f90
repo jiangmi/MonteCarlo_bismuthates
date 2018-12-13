@@ -40,7 +40,7 @@ contains
  d0 = 1.0d0
  alpha = alphaval
  spring_const = springval
- if_X_displace = 1
+ if_X_displace = 1 
 
  beta_max = bemaxval
  beta_min = beminval

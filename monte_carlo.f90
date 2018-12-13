@@ -45,7 +45,7 @@ contains
  use cluster, only: return_index_for_coordinates
  implicit none
  integer ix, iy, del, idx, i, ixp, ixm, iyp, iym
- integer ixpy, iymy, ixpymy, iypx, ixmx, ixmymx
+ integer ixpy, iymy, ixpymy, iypx, ixmx, ixmypx
  double precision, dimension(0:N-1) :: X
  double precision, dimension(0:N-1,0:N-1) :: H
 
