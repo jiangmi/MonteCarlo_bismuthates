@@ -87,13 +87,13 @@ contains
    ! set tpp for py orbital:
    iypx = return_index_for_coordinates(ix,iy+1,1)
    ixmx = return_index_for_coordinates(ix-1,iy,1)
-   ixmymx = return_index_for_coordinates(ix-1,iy-1,1)
+   ixmypx = return_index_for_coordinates(ix-1,iy+1,1)
    H(iyp,iypx)   =-tpp
-   H(iyp,ixmymx) = tpp
+   H(iyp,ixmypx) = tpp
    H(iyp,ixmx)   =-tpp
    H(iyp,ixp)    = tpp
    H(iypx,  iyp) =-tpp
-   H(ixmymx,iyp) = tpp
+   H(ixmypx,iyp) = tpp
    H(ixmx,  iyp) =-tpp
    H(ixp,   iyp) = tpp
   enddo
