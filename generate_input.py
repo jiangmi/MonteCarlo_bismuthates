@@ -17,6 +17,7 @@ es = 6.42
 ep = 2.42
 tsp = 2.08 
 tpp = 0.056
+dXamp = 0.2
 
 beta_max = 10.0
 beta_min = 1.0
@@ -42,6 +43,7 @@ def prepare_file(Nx, mu, fname, dir):
     text = text.replace("epval",  str(ep))
     text = text.replace("tspval",  str(tsp))
     text = text.replace("tppval",  str(tpp))
+    text = text.replace("dXampval",  str(dXamp))
     text = text.replace("bemaxval",  str(beta_max))
     text = text.replace("beminval",  str(beta_min))
     text = text.replace("nbetaval",  str(num_beta_steps))
@@ -61,7 +63,7 @@ def prepare_file(Nx, mu, fname, dir):
 for Nx in Nxs:
     for mu in mus:
         print "Nx = ", Nx, "mu = ", mu
-        fname = 'Nx'+str(Nx)+'_mu'+str(mu)+'_es'+str(es)+'_ep'+str(ep)+'_tsp'+str(tsp)+'_tpp'+str(tpp)+'_alpha'+str(alpha)+'_c'+str(spring_const)
+        fname = 'Nx'+str(Nx)+'_mu'+str(mu)+'_es'+str(es)+'_ep'+str(ep)+'_tsp'+str(tsp)+'_tpp'+str(tpp)+'_alpha'+str(alpha)+'_c'+str(spring_const)+'_dX'+str(dXamp)
         dir = "/home/mijiang/bismuth_MC/Nx"+str(Nx)+"_mu" + str(mu)
 
         os.chdir('/home/mijiang/bismuth_MC')

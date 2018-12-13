@@ -16,6 +16,7 @@ module parameters
  double precision tpp                    !O-O overlap integral
  double precision ep                     !Oxygen 2p site energy
  double precision es                     !Bi 6s site energy
+ double precision dXamp                  !dX amplitude
  double precision beta
  double precision beta_max      
  double precision beta_min
@@ -41,6 +42,7 @@ contains
  alpha = alphaval
  spring_const = springval
  if_X_displace = 1 
+ dXamp = dXampval
 
  beta_max = bemaxval
  beta_min = beminval
