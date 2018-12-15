@@ -11,7 +11,7 @@ do_submit = True
 
 Nxs = [4]  # e.g. 5 supercell = 10x10 lattice
 Nys = Nxs
-mus = np.arange(7.9, 7.91, 0.1)#, 1.2, 1.1, 1]#, 2.4, 2.6, 2.8, 3, 3.2, 3.4]#, 3.6, 3.8, 4, 4.2, 4.4]
+mus = np.arange(-0.14, -0.131, 0.1)#, 1.2, 1.1, 1]#, 2.4, 2.6, 2.8, 3, 3.2, 3.4]#, 3.6, 3.8, 4, 4.2, 4.4]
 
 es = 6.42
 ep = 2.42
@@ -20,12 +20,12 @@ tpp = 0.056
 dXamp = 0.2
 
 beta_max = 10.0
-beta_min = 1.0
-num_beta_steps = 9
+beta_min = 10.0
+num_beta_steps = 1
 
-nwarm = 200
+nwarm = 500
 ninv = 10    # print warmup progress per ninv steps
-nmeas = 100
+nmeas = 2000
 nbin = 10
 alpha = 300
 spring_const = 10
