@@ -63,7 +63,7 @@ def prepare_file(Nx, mu, fname, dir):
 for Nx in Nxs:
     for mu in mus:
         print "Nx = ", Nx, "mu = ", mu
-        fname = 'Nx'+str(Nx)+'_mu'+str(mu)+'_es'+str(es)+'_ep'+str(ep)+'_tsp'+str(tsp)+'_tpp'+str(tpp)+'_alpha'+str(alpha)+'_c'+str(spring_const)+'_dX'+str(dXamp)
+        fname = 'Nx'+str(Nx)+'_mu'+str(mu)+'_es'+str(es)+'_ep'+str(ep)+'_tsp'+str(tsp)+'_tpp'+str(tpp)+'_c'+str(spring_const)+'_alpha'+str(alpha)+'_dX'+str(dXamp)
         dir = "/home/mijiang/bismuth_MC/Nx"+str(Nx)+"_mu" + str(mu)
 
         os.chdir('/home/mijiang/bismuth_MC')
