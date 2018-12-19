@@ -1,10 +1,20 @@
 ! Define any formats needed for output
 100 format(a40,' ',f9.5,' +- ',f9.5)
+110 format(a40,' ',f9.5)
 200 format(a6, i3, a30, ' ',f8.5,' +- ',f8.5)
 300 format(a6, i3, ' ', i3, a30, ' ',f8.5,' +- ',f8.5)
 800 format(f4.1,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5)
 
 !print results into out.txt
+write(unit=6,fmt=110) '  es = ', es
+write(unit=6,fmt=110) '  ep = ', ep
+write(unit=6,fmt=110) '  tsp = ', tsp
+write(unit=6,fmt=110) '  tpp = ', tpp
+write(unit=6,fmt=110) '  mu = ', mu
+write(unit=6,fmt=110) '  alpha = ', alpha
+write(unit=6,fmt=110) '  spring_const = ', spring_const
+write(unit=6,fmt=110) '  beta = ', beta
+
 call get_err(benergy,Emean,Estd)
 write(unit=6,fmt=100) '  E_avg = ', Emean, Estd
 call get_err(bX,mean,std)

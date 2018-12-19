@@ -25,7 +25,7 @@ num_beta_steps = 1
 
 nwarm = 500
 ninv = 10    # print warmup progress per ninv steps
-nmeas = 2000
+nmeas = 200
 nbin = 10
 alpha = 300
 spring_const = 10
