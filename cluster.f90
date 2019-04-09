@@ -83,6 +83,7 @@ contains
      endif
 
      k = get_index(dx,dy)
+     print *, 'cluster: dclass', i,j,k
      dclass(i,j) = k
 
      ! Note for k = get_index(dx,dy) with dx<dy, dclass_F(k)=0

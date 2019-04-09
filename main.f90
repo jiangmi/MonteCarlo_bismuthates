@@ -12,17 +12,17 @@ use cluster
 use monte_carlo
 use measurements
 implicit none
-integer nbeta, ii,jj,i,j,k,ix,iy, bin
+integer ii,jj,i,j,k,ix,iy, bin, ibeta
 double precision mean,std,Emean,Estd,Nmean,Nstd,spmean,spstd,bpmean,bpstd
-double precision t1, t2, Xval, energy
+double precision t1, t2, Xval, Etot
 double precision, dimension(:),   allocatable :: X
 double precision, dimension(:,:), allocatable :: H0
-double precision, dimension(:),   allocatable :: betas
 
 call init_parameters()     ! classify distance in cluster.f90
 call allocate_quantities() ! set physical quantites
 500 format(a20,i7,a3,i7,a20,f8.5)
 600 format(a30,f8.5,a8,f8.5)
+call get_distance_class()
 
 call cpu_time(t1)
 
@@ -66,8 +66,8 @@ if (if_X_displace==1) then
 endif
 
 ! Loop over temperature starting from highest T
-do nbeta = 0,num_beta_steps
- beta = beta_min + dfloat(nbeta)*(beta_max-beta_min)/dfloat(num_beta_steps)
+do ibeta = 1,nbeta
+ beta = betas(ibeta)
  print*, '  '
  print*, '==========================================================='
  print 600, 'Start carrying out MC for beta = ', beta, 'T = ', 1./beta
@@ -88,8 +88,8 @@ do nbeta = 0,num_beta_steps
  enddo
 
  print *, 'warmup finished, X=', X
- call compute_total_E(energy, X)
- print *, 'warmup finished, total E=', energy
+ call compute_total_E(Etot, X)
+ print *, 'warmup finished, total E=', Etot
  
  ! measurements begins
  accept = 0
@@ -113,8 +113,9 @@ do nbeta = 0,num_beta_steps
  enddo
 
  print *, 'meas finished, X=', X
- call compute_total_E(energy, X)
- print *, 'meas finished, total E=', energy
+ call compute_total_E(Etot, X)
+ print *, 'meas finished, total E=', Etot
+ print *, '===================================='
  
  include 'output_results.f90' 
 enddo

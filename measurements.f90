@@ -165,7 +165,7 @@ contains
    Xi_A1g = 0.5d0*(X(ixp) - X(ixm) + X(iyp) - X(iym))
 
    !sum over eigenstates
-   do nn = 0,N-1       
+   do nn = 0,N-1  
      fermi = 1.0d0/(exp(beta*(Ek(nn)-mu))+1.0d0)
      fac = 2.0d0*fermi/Nbi
      tmp1 = fac*U(i,nn)*U(i,nn)

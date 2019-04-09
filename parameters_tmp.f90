@@ -9,7 +9,7 @@ module parameters
  integer Nbi                             !total number of Bi orbitals
  integer nclass                          !number of distance class
  integer num_beta_steps
- integer nwarms, ninv, nmeas, nbin
+ integer nwarms, ninv, nmeas, nbin, nbeta
  integer if_X_displace                   ! No displacement for checking code
  double precision mu
  double precision tsp                    !O-Bi overlap integral
@@ -18,8 +18,7 @@ module parameters
  double precision es                     !Bi 6s site energy
  double precision dXamp                  !dX amplitude
  double precision beta
- double precision beta_max      
- double precision beta_min
+ double precision, dimension(:),   allocatable :: betas
  double precision spring_const           !harmonic potential
  double precision alpha                  !Anharmonic potential
  double precision d0                     !equilibrium bond distance
@@ -44,9 +43,9 @@ contains
  if_X_displace = 1
  dXamp = dXampval
 
- beta_max = bemaxval
- beta_min = beminval
- num_beta_steps = nbetaval
+ nbeta = nbetaval
+ allocate(betas(1:nbeta))
+ betas = betasval
 
  nwarms = nwarmval
  ninv = ninvval    ! print warmup progress per ninv steps
