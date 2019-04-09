@@ -11,24 +11,22 @@ do_submit = True
 
 Nxs = [4]  # e.g. 5 supercell = 10x10 lattice
 Nys = Nxs
-mus = np.arange(-0.14, -0.131, 0.1)#, 1.2, 1.1, 1]#, 2.4, 2.6, 2.8, 3, 3.2, 3.4]#, 3.6, 3.8, 4, 4.2, 4.4]
+mus = np.arange(-0.19, -0.211, -0.01)#, 1.2, 1.1, 1]#, 2.4, 2.6, 2.8, 3, 3.2, 3.4]#, 3.6, 3.8, 4, 4.2, 4.4]
 
 es = 6.42
 ep = 2.42
 tsp = 2.08 
-tpp = 0.056
-dXamp = 0.2
+tpp = 0.0
+dXamp = 0.1
 
-beta_max = 10.0
-beta_min = 10.0
-num_beta_steps = 1
+betas = '10.0'
 
-nwarm = 500
+nwarm = 10000
 ninv = 10    # print warmup progress per ninv steps
-nmeas = 200
+nmeas = 20000
 nbin = 10
-alpha = 300
 spring_const = 10
+alpha = 1
 
 def prepare_file(Nx, mu, fname, dir):
 
@@ -64,7 +62,7 @@ for Nx in Nxs:
     for mu in mus:
         print "Nx = ", Nx, "mu = ", mu
         fname = 'Nx'+str(Nx)+'_mu'+str(mu)+'_es'+str(es)+'_ep'+str(ep)+'_tsp'+str(tsp)+'_tpp'+str(tpp)+'_c'+str(spring_const)+'_alpha'+str(alpha)+'_dX'+str(dXamp)
-        dir = "/home/mijiang/bismuth_MC/Nx"+str(Nx)+"_mu" + str(mu)
+        dir = "/home/mijiang/bismuth_MC/Nx"+str(Nx)+"_mu" + str(mu)+'_c'+str(spring_const)+'_alpha'+str(alpha)
 
         os.chdir('/home/mijiang/bismuth_MC')
         cmd = "cp parameters_tmp.f90 parameters.f90"

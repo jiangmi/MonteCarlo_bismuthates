@@ -1,5 +1,5 @@
 ! Define any formats needed for output
-100 format(a40,' ',f9.5,' +- ',f9.5)
+100 format(a40,' ',f13.5,' +- ',f13.5)
 110 format(a40,' ',f9.5)
 200 format(a6, i3, a30, ' ',f8.5,' +- ',f8.5)
 300 format(a6, i3, ' ', i3, a30, ' ',f8.5,' +- ',f8.5)

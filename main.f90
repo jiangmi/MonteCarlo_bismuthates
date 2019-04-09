@@ -12,13 +12,14 @@ use cluster
 use monte_carlo
 use measurements
 implicit none
-integer nbeta, ii,jj,i,j,k, bin
+integer nbeta, ii,jj,i,j,k,ix,iy, bin
 double precision mean,std,Emean,Estd,Nmean,Nstd,spmean,spstd,bpmean,bpstd
-double precision E, t1, t2
+double precision t1, t2, Xval, energy
 double precision, dimension(:),   allocatable :: X
 double precision, dimension(:,:), allocatable :: H0
-call init_parameters()     ! set all the relevant parameters
-call get_distance_class()  ! classify distance in cluster.f90
+double precision, dimension(:),   allocatable :: betas
+
+call init_parameters()     ! classify distance in cluster.f90
 call allocate_quantities() ! set physical quantites
 500 format(a20,i7,a3,i7,a20,f8.5)
 600 format(a30,f8.5,a8,f8.5)
@@ -35,18 +36,41 @@ allocate(H0(0:N-1,0:N-1))
 !Initialize the displacement to zero and then a small value
 X = 0.0d0
 if (if_X_displace==1) then
+  !random initial X
   do i = 0,N-1
    if(.not.is_bismuth(i))then
-    X(i) = (ran2(iran)-0.50d0)*0.001d0
+    X(i) = (ran2(iran)-0.50d0)*dXamp
    endif
   enddo
+
+  !initial bond disproportionated lattice distortion
+  !Xval = 0.18
+  !do ix = 0,Nx-1
+  !  do iy = 0,Ny-1
+  !    !px orbital's displacement
+  !    i = return_index_for_coordinates(ix,iy,1)
+  !    if (mod(ix+iy,2)==1) then
+  !      X(i) = Xval
+  !    else
+  !      X(i) = -Xval
+  !    endif
+  !    !py orbital's displacement
+  !    i = return_index_for_coordinates(ix,iy,2)                                    
+  !    if (mod(ix+iy,2)==1) then                                                    
+  !      X(i) = Xval                                                                
+  !    else
+  !      X(i) = -Xval                                                               
+  !    endif
+  !  enddo
+  !enddo
 endif
 
 ! Loop over temperature starting from highest T
 do nbeta = 0,num_beta_steps
  beta = beta_min + dfloat(nbeta)*(beta_max-beta_min)/dfloat(num_beta_steps)
  print*, '  '
- print 600, 'Carrying out MC for beta = ', beta, 'T = ', 1./beta
+ print*, '==========================================================='
+ print 600, 'Start carrying out MC for beta = ', beta, 'T = ', 1./beta
  
  ! warmup begins
  accept = 0
@@ -58,8 +82,14 @@ do nbeta = 0,num_beta_steps
    accept = 0
    reject = 0
   endif
+  !print*, '------------------------'
+  !print*, 'warmup sweep No.',i
   call single_site_sweep(X,accept,reject)
  enddo
+
+ print *, 'warmup finished, X=', X
+ call compute_total_E(energy, X)
+ print *, 'warmup finished, total E=', energy
  
  ! measurements begins
  accept = 0
@@ -76,9 +106,15 @@ do nbeta = 0,num_beta_steps
    call populate_bins(bin)
    call zero_accumulators()
   endif
+  !print*, '------------------------'
+  !print*, 'measurement sweep No.',i
   call single_site_sweep(X,accept,reject)
   call do_measurements(X)
  enddo
+
+ print *, 'meas finished, X=', X
+ call compute_total_E(energy, X)
+ print *, 'meas finished, total E=', energy
  
  include 'output_results.f90' 
 enddo

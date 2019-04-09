@@ -21,18 +21,25 @@ contains
   else
     deltaX = 0.d0
   endif
+
   Xproposed = X
   Xproposed(site) = Xproposed(site) + deltaX
 
   call compute_total_E(Enew,XProposed)
   ratio = minval([exp(-beta*(Enew-Eold)),1.0d0])
-
   r = ran2(iran)
+  !print *, "Eold = ", Eold
+  !print *, "Enew = ", Enew
+  !print *, "ratio = ", ratio
+
   if(r.le.ratio)then
    accept = accept + 1
    Eold = Enew
    X = Xproposed
+   !print*, "accepted new displacement X="
+   !print*, X(NBi:N-1)
   else
+   !print*, "X update rejected"
    reject = reject + 1
   endif
  enddo
@@ -115,7 +122,7 @@ contains
  use parameters, only: Nbi, N, spring_Const, alpha
  implicit none
  double precision, dimension(0:N-1) :: X
- elastic_energy = 0.5d0*Spring_Const*sum(X*X) + alpha*sum(X*X*X*X) 
+ elastic_energy = 0.5d0*Spring_Const*sum(X*X) + 0.25d0*alpha*sum(X*X*X*X) 
  return
  end function elastic_energy
  !=============================================================================
@@ -139,6 +146,8 @@ contains
 
  !set the total energy to the elastic energy
  energy = elastic_energy(X)
+ !print*, '-----------------------------------'
+ !print *, 'elastic energy=',energy
  !Get the Hamiltonian for the current displacement pattern
  info = 0
 
@@ -146,6 +155,9 @@ contains
  !get the eigenvalues for H0
 
  call dsyev('N','U',N,H0,N,Ek,work,lwork,info)
+ !print *, "X=",X
+ !print *, "sum(X)=", sum(X)/N
+ !print *, "min and max eigen E=", minval(Ek), maxval(Ek)
  if (info.ne.0) then
     print *,"dsyev error", N, lwork, info
     stop
@@ -153,9 +165,10 @@ contains
 
  !Get the total energy
  do i = 0,N-1
-   fermi = 1/(exp(beta*(Ek(i)-mu))+1.0d0)
+   fermi = 1.0d0/(exp(beta*(Ek(i)-mu))+1.0d0)
    energy = energy + 2.0d0*(Ek(i)-mu)*fermi
  enddo
+ !print *, 'total E=',energy
  return
  end subroutine compute_total_E
 
