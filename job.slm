@@ -1,9 +1,9 @@
 #!/bin/bash -l
 #
-#SBATCH --job-name="bismuth"
+#SBATCH --job-name="1.0_35_700"
 #SBATCH --nodes=1
-#SBATCH --output=out_Nx4_mu-0.22_es6.42_ep2.42_tsp2.08_tpp0.0_k90_alpha100_dX0.1.txt
-#SBATCH --error=err_Nx4_mu-0.22_es6.42_ep2.42_tsp2.08_tpp0.0_k90_alpha100_dX0.1.txt
+#SBATCH --output=out_Nx4_mu1.0_es6.42_ep2.42_tsp2.08_tpp0.056_k35_alpha700_dX0.15.txt
+#SBATCH --error=err_Nx4_mu1.0_es6.42_ep2.42_tsp2.08_tpp0.056_k35_alpha700_dX0.15.txt
 
 date
 

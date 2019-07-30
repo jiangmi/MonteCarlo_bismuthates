@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #
-#SBATCH --job-name="bismuth"
+#SBATCH --job-name="muval_kval_alval"
 #SBATCH --nodes=1
 #SBATCH --output=out_fnameval.txt
 #SBATCH --error=err_fnameval.txt

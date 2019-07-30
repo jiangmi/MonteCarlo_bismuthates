@@ -39,7 +39,7 @@ if (if_X_displace==1) then
   !random initial X
   do i = 0,N-1
    if(.not.is_bismuth(i))then
-    X(i) = (ran2(iran)-0.50d0)*dXamp
+    X(i) = (ran2(iran)-0.50d0)*2.d0*dXamp
    endif
   enddo
 

@@ -11,23 +11,23 @@ do_submit = True
 
 Nxs = [4]  # e.g. 5 supercell = 10x10 lattice
 Nys = Nxs
-mus = np.arange(-0.18, -0.221, -0.02)#, 1.2, 1.1, 1]#, 2.4, 2.6, 2.8, 3, 3.2, 3.4]#, 3.6, 3.8, 4, 4.2, 4.4]
+mus = np.arange(0.0, 1.001, 0.05)#, 1.2, 1.1, 1]#, 2.4, 2.6, 2.8, 3, 3.2, 3.4]#, 3.6, 3.8, 4, 4.2, 4.4]
 
 es = 6.42
 ep = 2.42
 tsp = 2.08 
-tpp = 0.0
-dXamp = 0.1
+tpp = 0.056
+dXamp = 0.15
 
 nbeta = 1
 betas = '10.0'
 
-nwarm = 20000
+nwarm = 100000
 ninv = 10    # print warmup progress per ninv steps
-nmeas = 30000
+nmeas = 500000
 nbin = 10
-ks = [1, 10, 30, 50, 70, 90]
-alphas = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+ks = [35]#, 50, 60, 70, 80]#1, 10, 30, 50, 70, 90]
+alphas = [400, 500, 600, 700]
 
 def prepare_file(Nx, mu, k, al, fname, dir):
 
@@ -64,9 +64,9 @@ for Nx in Nxs:
             for al in alphas:
                 print "Nx = ", Nx, "mu = ", mu, 'k = ', k, 'alpha = ', al
                 fname = 'Nx'+str(Nx)+'_mu'+str(mu)+'_es'+str(es)+'_ep'+str(ep)+'_tsp'+str(tsp)+'_tpp'+str(tpp)+'_k'+str(k)+'_alpha'+str(al)+'_dX'+str(dXamp)
-                dir = "/home/mijiang/bismuth_MC/Nx"+str(Nx)+"_mu" + str(mu)+'_k'+str(k)+'_alpha'+str(al)
+                dir = "/home/mijiang/bismuth_MC/run/"+fname
 
-                os.chdir('/home/mijiang/bismuth_MC')
+                os.chdir('/home/mijiang/bismuth_MC/run')
                 cmd = "cp parameters_tmp.f90 parameters.f90"
                 os.system(cmd)
                 prepare_file(Nx,mu,k,al,fname,dir)
@@ -81,6 +81,10 @@ for Nx in Nxs:
                 file.close()                
                 text = text.replace("fnameval",  str(fname))
                 text = text.replace("dirval",  str(dir))
+		text = text.replace("muval",  str(mu))
+		text = text.replace("kval",  str(k))
+		text = text.replace("alval",  str(al))
+
                 file = open("job.slm", "w")
                 file.write(text)
                 file.close()
