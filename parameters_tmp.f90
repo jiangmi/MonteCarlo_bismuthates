@@ -5,6 +5,7 @@ module parameters
  integer Nx 
  integer Ny 
  integer, parameter :: Norb = 3          !number of orbitals in the basis
+ real*8,  parameter :: pi = 3.1415926
  integer N                               !total number of orbitals
  integer Nbi                             !total number of Bi orbitals
  integer nclass                          !number of distance class
@@ -54,9 +55,9 @@ contains
 
  !======================================================
  ! Initialize files for recording results VS temperature
- 500 format(a80)
+ 510 format(a80)
  open(unit=11,file='dirval'//'/data_'//'fnameval'//'.txt',status="replace")
- write(unit=11,fmt=500) 'beta    n_avg    n_err    E_avg    E_err    sp_avg    sp_err    bp_avg    bp_err'
+ write(unit=11,fmt=510) 'beta    n_avg    n_err    E_avg    E_err    sp_avg    sp_err    bp_avg    bp_err'
 
  return
  end subroutine init_parameters

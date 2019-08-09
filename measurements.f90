@@ -1,31 +1,40 @@
 module measurements
  use parameters, only: nbin
  integer cnt  ! count the measurements in each bin
+ integer o1, o2
 
  ! accumulated quantites
  double precision aenergy, ax, ax2
- double precision antot, anbis, anox, anoy
- double precision anpa1g  !Number of oxygen holes with A1g symmetry
+ double precision antot, anbis_avg, anox, anoy
+ double precision anpa1g_avg  !Number of oxygen holes with A1g symmetry
  double precision asp_site_avg
  double precision abp_site_avg
+ double precision, dimension(:), allocatable  :: anbis
+ double precision, dimension(:), allocatable  :: anpa1g
  double precision, dimension(:), allocatable  :: aspolaron
  double precision, dimension(:), allocatable  :: abpolaron
  double precision, dimension(:), allocatable  :: aspolaron_ij
+ double precision, dimension(:), allocatable  :: achi_sc
+ double precision, dimension(:,:,:), allocatable  :: achi_ch
 
  !Below are for binned quantites
  double precision, dimension(:), allocatable  :: benergy 
  double precision, dimension(:), allocatable  :: bx
  double precision, dimension(:), allocatable  :: bx2
- double precision, dimension(:), allocatable  :: bnbis
+ double precision, dimension(:), allocatable  :: bnbis_avg
  double precision, dimension(:), allocatable  :: bnox
  double precision, dimension(:), allocatable  :: bnoy
  double precision, dimension(:), allocatable  :: bntot
- double precision, dimension(:), allocatable  :: bnpa1g
+ double precision, dimension(:), allocatable  :: bnpa1g_avg
  double precision, dimension(:), allocatable  :: bsp_site_avg
  double precision, dimension(:), allocatable  :: bbp_site_avg
+ double precision, dimension(:,:), allocatable  :: bnbis
+ double precision, dimension(:,:), allocatable  :: bnpa1g
  double precision, dimension(:,:), allocatable :: bspolaron
  double precision, dimension(:,:), allocatable :: bbpolaron
  double precision, dimension(:,:), allocatable :: bspolaron_ij
+ double precision, dimension(:,:), allocatable  :: bchi_sc
+ double precision, dimension(:,:,:,:), allocatable  :: bchi_ch
 contains
  !=============================================================================
  subroutine get_err(bins,mean,std)
@@ -42,34 +51,52 @@ contains
  subroutine allocate_quantities()
  use parameters
  implicit none
+ allocate(anbis(0:Nbi-1))
+ allocate(anpa1g(0:Nbi-1))
  allocate(aspolaron(0:Nbi-1))
  allocate(abpolaron(0:Nbi-1))
  allocate(aspolaron_ij(0:nclass-1))
+ allocate(achi_sc(0:Norb-1))
+ allocate(achi_ch(0:nclass-1, 0:Norb-1, 0:Norb-1)) 
  allocate(benergy(1:nbin))
- allocate(bx(1:nbin))
- allocate(bx2(1:nbin))
- allocate(bnbis(1:nbin))
- allocate(bnox(1:nbin))
- allocate(bnoy(1:nbin))
- allocate(bntot(1:nbin))
- allocate(bnpa1g(1:nbin))
- allocate(bsp_site_avg(1:nbin))
- allocate(bbp_site_avg(1:nbin))
- allocate(bspolaron(1:nbin, 0:Nbi-1))
- allocate(bbpolaron(1:nbin, 0:Nbi-1))
- allocate(bspolaron_ij(1:nbin, 0:nclass-1))
- end subroutine allocate_quantities
+ allocate(bx(nbin))
+ allocate(bx2(nbin))
+ allocate(bnbis_avg(nbin))
+ allocate(bnox(nbin))
+ allocate(bnoy(nbin))
+ allocate(bntot(nbin))
+ allocate(bnpa1g_avg(nbin))
+ allocate(bnbis(0:Nbi-1, nbin))
+ allocate(bnpa1g(0:Nbi-1, nbin))
+ allocate(bsp_site_avg(nbin))
+ allocate(bbp_site_avg(nbin))
+ allocate(bspolaron(0:Nbi-1, nbin))
+ allocate(bbpolaron(0:Nbi-1, nbin))
+ allocate(bspolaron_ij(0:nclass-1, nbin)) 
+ allocate(bchi_sc(0:Norb-1, nbin))
+ allocate(bchi_ch(0:nclass-1, 0:Norb-1, 0:Norb-1, nbin))
+end subroutine allocate_quantities
  !=============================================================================
  subroutine deallocate_quantities()
  implicit none
+ deallocate(anbis)
+ deallocate(anpa1g)
  deallocate(aspolaron)
  deallocate(abpolaron)
  deallocate(aspolaron_ij)
+ deallocate(achi_sc)
+ deallocate(achi_ch)
+ deallocate(bnbis_avg)
+ deallocate(bnpa1g_avg)
+ deallocate(bnbis)
+ deallocate(bnpa1g)
  deallocate(bsp_site_avg)
  deallocate(bbp_site_avg)
  deallocate(bspolaron)
  deallocate(bbpolaron)
  deallocate(bspolaron_ij)
+ deallocate(bchi_sc)
+ deallocate(bchi_ch)
  end subroutine deallocate_quantities
  !=============================================================================
  subroutine zero_accumulators()
@@ -84,11 +111,15 @@ contains
  anbis = 0.0d0
  antot = 0.0d0
  anpa1g = 0.0d0
+ anbis_avg = 0.0d0
+ anpa1g_avg = 0.0d0
  asp_site_avg = 0.d0
  abp_site_avg = 0.d0
  aspolaron = 0.0d0
  abpolaron = 0.0d0 
  aspolaron_ij = 0.0d0
+ achi_sc = 0.0d0
+ achi_ch = 0.0d0
  end subroutine zero_accumulators
  !=============================================================================
  subroutine populate_bins(bin)
@@ -99,15 +130,19 @@ contains
  bX(bin) = aX/dfloat(cnt)
  bX2(bin) = aX2/dfloat(cnt)
  bntot(bin) = antot/dfloat(cnt)
- bnbis(bin) = anbis/dfloat(cnt)
+ bnbis_avg(bin) = anbis_avg/dfloat(cnt)
  bnox(bin) = anox/dfloat(cnt)
  bnoy(bin) = anoy/dfloat(cnt)
- bnpa1g(bin) = anpa1g/dfloat(cnt)
+ bnpa1g_avg(bin) = anpa1g_avg/dfloat(cnt)
+ bnbis(:,bin) = anbis/dfloat(cnt)
+ bnpa1g(:,bin) = anpa1g/dfloat(cnt)
  bsp_site_avg(bin) = asp_site_avg/dfloat(cnt)
  bbp_site_avg(bin) = abp_site_avg/dfloat(cnt)
- bspolaron(bin,:) = aspolaron/dfloat(cnt)
- bbpolaron(bin,:) = abpolaron/dfloat(cnt)
- bspolaron_ij(bin,:) = aspolaron_ij/dfloat(cnt)
+ bspolaron(:,bin) = aspolaron/dfloat(cnt)
+ bbpolaron(:,bin) = abpolaron/dfloat(cnt)
+ bspolaron_ij(:,bin) = aspolaron_ij/dfloat(cnt)
+ bchi_sc(:,bin) = achi_sc/dfloat(cnt)
+ bchi_ch(:,:,:,bin) = achi_ch/dfloat(cnt)
  return
  end subroutine populate_bins
  
@@ -116,13 +151,13 @@ contains
  !============================================================================
  subroutine do_measurements(X)
  use parameters
- use cluster, only: return_index_for_coordinates, dclass, dclass_F
+ use cluster, only: return_index_for_coordinates, dclass, dclass_F, expqr
  use monte_carlo, only: compute_total_E, get_H
  implicit none
  integer ix, iy, jx, jy, tau, nn, nnp, mm, nnn
  integer ixp, iyp, ixm, iym
  integer jxp, jyp, jxm, jym
- integer i, j, k, info
+ integer i, j, k, info, i1, i2, j1, j2
  integer lwork
  double precision, dimension(0:N-1,0:N-1) :: U
  double precision, allocatable, dimension(:) :: work
@@ -171,7 +206,8 @@ contains
      tmp1 = fac*U(i,nn)*U(i,nn)
      tmp2 = fac*U(ixp,nn)*U(ixp,nn)
      tmp3 = fac*U(iyp,nn)*U(iyp,nn)
-     anbis = anbis + tmp1
+     anbis(i) = anbis(i) + tmp1*Nbi
+     anbis_avg = anbis_avg + tmp1
      anox  = anox  + tmp2
      anoy  = anoy  + tmp3
      antot = antot + tmp1+tmp2+tmp3
@@ -181,7 +217,8 @@ contains
      a_inn2 = a_inn*a_inn
      s_inn2 = s_inn*s_inn
 
-     anpa1g = anpa1g + fac*a_inn2
+     anpa1g(i)  = anpa1g(i) + fac*a_inn2*Nbi
+     anpa1g_avg = anpa1g_avg + fac*a_inn2
 
      ! aspolaron does not need Nbi because of (i) index
      tmp1 = 2.0d0*fermi*Xi_A1g*(s_inn2 + a_inn2)
@@ -202,14 +239,11 @@ contains
        a_innp2 = a_innp*a_innp
        s_innp2 = s_innp*s_innp
        
-       tmp1 = fermi**fermi1* Xi_A1g*   &
-              (2.0d0*a_inn2*s_innp2 + s_inn2*s_innp2 + a_inn2*a_innp2)
+       tmp1 = fermi*fermi1* Xi_A1g*   &
+              (s_inn2 + a_inn2)*(s_innp2 + a_innp2)
        abpolaron(i) = abpolaron(i) + tmp1
        abp_site_avg = abp_site_avg + tmp1/Nbi
 
-       !!!!!!!!!!!!!!!!!!!!!!!!!!
-       !!       <L_i*L_j>      !!
-       !!!!!!!!!!!!!!!!!!!!!!!!!!
        do jx = 0,Nx-1
          do jy = 0,Ny-1
            j = return_index_for_coordinates(jx,jy,0)
@@ -219,7 +253,11 @@ contains
            jym = return_index_for_coordinates(jx  ,jy-1,1)
 
            k = dclass(i,j)
+          ! print*, 'meas ', k,i,j
 
+           !!!!!!!!!!!!!!!!!!!!!!!!
+           !!       <L_i*L_j>    !!
+           !!!!!!!!!!!!!!!!!!!!!!!!
            Xj_A1g = 0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
            a_jnnp = 0.5d0*(U(jxp,nnp) - U(jxm,nnp) + U(jyp,nnp) - U(jym,nnp))
            a_jnn  = 0.5d0*(U(jxp,nn) - U(jxm,nn) + U(jyp,nn) - U(jym,nn))
@@ -236,6 +274,31 @@ contains
                                     - a_inn*s_jnn*a_innp*s_jnnp  &
                                     + a_inn2*a_jnnp2             &
                                     - a_inn*a_jnn*a_innp*a_jnnp )
+
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
+           !!      s-wave susceptibilities     !!                                                 
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+           do o1 = 0,Norb-1
+             i1 = return_index_for_coordinates(ix,iy,o1)
+             i2 = return_index_for_coordinates(jx,jy,o1)
+             achi_sc(o1) = achi_sc(o1) + fermi*fermi1/Nbi   &
+                 *U(i1,nn)*U(i1,nn)*U(i2,nnp)*U(i2,nnp)
+           enddo
+
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
+           !!      charge susceptibilities     !!                                                 
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+           do o1 = 0,Norb-1
+             do o2 = 0,Norb-1
+               j1 = return_index_for_coordinates(ix,iy,0)
+               j2 = return_index_for_coordinates(jx,jy,0)
+               i1 = return_index_for_coordinates(ix,iy,o1)
+               i2 = return_index_for_coordinates(jx,jy,o2)
+               achi_ch(k,o1,o2) = achi_ch(k,o1,o2) + 4.0d0*fermi*fermi1/Nbi   &
+                   *expqr(k,j1,j2)*U(i1,nn)*U(i1,nn)*U(i2,nnp)*U(i2,nnp)
+                  ! *U(i1,nn)*U(i1,nn)*U(i2,nnp)*U(i2,nnp)
+             enddo
+           enddo
          enddo
        enddo  !end loop jx, jy
      enddo !end loop nnp

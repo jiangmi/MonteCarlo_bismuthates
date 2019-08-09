@@ -17,7 +17,8 @@ contains
  call compute_total_E(Eold,X)
  do site = NBi,N-1
   if (if_X_displace==1) then
-    deltaX = (ran2(iran)-0.5d0)*2.d0*dXamp
+    !deltaX = (ran2(iran)-0.5d0)*2.d0*dXamp
+    deltaX = 0.d0
   else
     deltaX = 0.d0
   endif
@@ -74,10 +75,10 @@ contains
    H(i,iyp) =-tsp/((1.0d0 + if_X_displace* X(iyp)/d0)**(2.0d0))
    H(i,ixm) = tsp/((1.0d0 - if_X_displace* X(ixm)/d0)**(2.0d0))
    H(i,iym) = tsp/((1.0d0 - if_X_displace* X(iym)/d0)**(2.0d0))
-   H(ixp,i) =-tsp/((1.0d0 + if_X_displace* X(ixp)/d0)**(2.0d0))
-   H(iyp,i) =-tsp/((1.0d0 + if_X_displace* X(iyp)/d0)**(2.0d0))
-   H(ixm,i) = tsp/((1.0d0 - if_X_displace* X(ixm)/d0)**(2.0d0))
-   H(iym,i) = tsp/((1.0d0 - if_X_displace* X(iym)/d0)**(2.0d0))
+   H(ixp,i) = H(i,ixp)
+   H(iyp,i) = H(i,iyp)
+   H(ixm,i) = H(i,ixm)
+   H(iym,i) = H(i,iym)
 
    ! set tpp for px orbital:
    ixpy = return_index_for_coordinates(ix+1,iy,2)

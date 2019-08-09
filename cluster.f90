@@ -2,9 +2,11 @@
 ! first 0:NBi-1 is bismuth and then px orbital and finally py orbital 
 ! N = Nx*Ny*Norb; NBi = Nx*Ny
 module cluster 
- use parameters, only: N, Nx, Ny, Nbi, nclass
+ use parameters, only: N, pi, Nx, Ny, Nbi, nclass
+ real*8 qx, qy
  integer, dimension(:,:), allocatable :: dclass  
  integer, dimension(:),   allocatable :: dclass_F
+ real*8,  dimension(:,:,:), allocatable :: expqr
 contains
  
  !=============================================================================
@@ -26,6 +28,7 @@ contains
  return_index_for_coordinates = ix + iy*Nx + del*Nx*Ny
  return
  end function return_index_for_coordinates
+
  !=============================================================================
  subroutine return_coordinates_for_index(idx,ix,iy,del)
  implicit none
@@ -37,6 +40,7 @@ contains
  ix = itmp - iy*Nx
  return
  end subroutine return_coordinates_for_index
+
  !=============================================================================
  logical function is_bismuth(i)
  implicit none
@@ -48,13 +52,19 @@ contains
  endif
  return
  end function is_bismuth
+
  !=============================================================================
  subroutine get_distance_class()
  ! Obtain the distance_class for two unit cell origins (Bi atoms)
+ ! Also get table of exp(q*(r_i+r_j)) for computing charge chi_ch(q)
+ ! In expqr(q, r_i, r_j), the number of possible q is same as distance class
+ ! but q's value is (dx*2*pi/Nx, dy*2*pi/Ny)
  implicit none
  integer dx, dy, ix,iy,jx,jy,i,j,k,cnt
  allocate(dclass(0:Nbi-1,0:Nbi-1))
  allocate(dclass_F(0:nclass-1))
+ allocate(expqr(0:nclass-1, 0:Nbi-1,0:Nbi-1))
+ expqr = 0.d0
  dclass = 0
  dclass_F = 0
  cnt = 0
@@ -84,15 +94,23 @@ contains
 
      k = get_index(dx,dy)
      dclass(i,j) = k
+     !print*, k, 'd=',dx, dy, 'site',i,j
 
      ! Note for k = get_index(dx,dy) with dx<dy, dclass_F(k)=0
      dclass_F(k) = dclass_F(k)+1 
+
+     ! Compute exp(i*q*(r_i+r_j))     
+     qx = dx*2.0d0*pi/Nx
+     qy = dy*2.0d0*pi/Ny
+     expqr(k,i,j) = cos(qx*(ix+jx) + qy*(iy+jy))
+   !  print*, 'q=',qx,qy,'r=',ix+jx,iy+jy,'expqr=',expqr(k,i,j)
     enddo
    enddo
   enddo
  enddo
  return
  end subroutine get_distance_class
+
  !=============================================================================                       
  ! get a unique integer to identify a distance class      
  ! (i,j) labels distance = (dx,dy) between sites                                 
@@ -106,4 +124,5 @@ contains
  get_index = i + j*(Nx/2+1)                                             
  return    
  end function get_index
+
 end module cluster 
