@@ -17,8 +17,7 @@ contains
  call compute_total_E(Eold,X)
  do site = NBi,N-1
   if (if_X_displace==1) then
-    !deltaX = (ran2(iran)-0.5d0)*2.d0*dXamp
-    deltaX = 0.d0
+    deltaX = (ran2(iran)-0.5d0)*2.d0*dXamp
   else
     deltaX = 0.d0
   endif

@@ -37,32 +37,32 @@ allocate(H0(0:N-1,0:N-1))
 X = 0.0d0
 if (if_X_displace==1) then
   !random initial X
-  !do i = 0,N-1
-  ! if(.not.is_bismuth(i))then
-  !  X(i) = (ran2(iran)-0.50d0)*2.d0*dXamp
-  ! endif
-  !enddo
+  do i = 0,N-1
+   if(.not.is_bismuth(i))then
+    X(i) = (ran2(iran)-0.50d0)*2.d0*dXamp
+   endif
+  enddo
 
   !initial bond disproportionated lattice distortion
-  Xval = 0.15
-  do ix = 0,Nx-1
-    do iy = 0,Ny-1
-      !px orbital's displacement
-      i = return_index_for_coordinates(ix,iy,1)
-      if (mod(ix+iy,2)==1) then
-        X(i) = Xval
-      else
-        X(i) = -Xval
-      endif
-      !py orbital's displacement
-      i = return_index_for_coordinates(ix,iy,2)                                    
-      if (mod(ix+iy,2)==1) then                                                    
-        X(i) = Xval                                                                
-      else
-        X(i) = -Xval                                                               
-      endif
-    enddo
-  enddo
+  !Xval = 0.15
+  !do ix = 0,Nx-1
+  !  do iy = 0,Ny-1
+  !    !px orbital's displacement
+  !    i = return_index_for_coordinates(ix,iy,1)
+  !    if (mod(ix+iy,2)==1) then
+  !      X(i) = Xval
+  !    else
+  !      X(i) = -Xval
+  !    endif
+  !    !py orbital's displacement
+  !    i = return_index_for_coordinates(ix,iy,2)                                    
+  !    if (mod(ix+iy,2)==1) then                                                    
+  !      X(i) = Xval                                                                
+  !    else
+  !      X(i) = -Xval                                                               
+  !    endif
+  !  enddo
+  !enddo
 endif
 
 ! Loop over temperature starting from highest T

@@ -197,7 +197,7 @@ end subroutine allocate_quantities
    iyp = return_index_for_coordinates(ix,iy,2) 
    ixm = return_index_for_coordinates(ix-1,iy,1)
    iym = return_index_for_coordinates(ix,iy-1,2)
-   Xi_A1g = 0.5d0*(X(ixp) - X(ixm) + X(iyp) - X(iym))
+   Xi_A1g = -0.5d0*(X(ixp) - X(ixm) + X(iyp) - X(iym))
 
    !sum over eigenstates
    do nn = 0,N-1  
@@ -258,7 +258,7 @@ end subroutine allocate_quantities
            !!!!!!!!!!!!!!!!!!!!!!!!
            !!       <L_i*L_j>    !!
            !!!!!!!!!!!!!!!!!!!!!!!!
-           Xj_A1g = 0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
+           Xj_A1g = -0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
            a_jnnp = 0.5d0*(U(jxp,nnp) - U(jxm,nnp) + U(jyp,nnp) - U(jym,nnp))
            a_jnn  = 0.5d0*(U(jxp,nn) - U(jxm,nn) + U(jyp,nn) - U(jym,nn))
            a_jnn2  = a_jnn *a_jnn
