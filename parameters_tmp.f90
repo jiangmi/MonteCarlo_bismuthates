@@ -73,8 +73,10 @@ contains
    open(unit=16,file='dirval'//'/MC_nLs_'//'fnameval'//'.txt',status="replace")
    open(unit=17,file='dirval'//'/MC_Sp_Xa1g_'//'fnameval'//'.txt',status="replace")
    open(unit=18,file='dirval'//'/MC_Bp_Xa1g_'//'fnameval'//'.txt',status="replace")
-   open(unit=19,file='dirval'//'/MC_Sp_'//'fnameval'//'.txt',status="replace")
-   open(unit=20,file='dirval'//'/MC_Bp_'//'fnameval'//'.txt',status="replace")
+   open(unit=19,file='dirval'//'/MC_Sp_Ls_'//'fnameval'//'.txt',status="replace")
+   open(unit=20,file='dirval'//'/MC_Bp_Ls_'//'fnameval'//'.txt',status="replace")
+   open(unit=21,file='dirval'//'/MC_Sp_'//'fnameval'//'.txt',status="replace")
+   open(unit=22,file='dirval'//'/MC_Bp_'//'fnameval'//'.txt',status="replace")
  endif
 
  return

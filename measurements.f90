@@ -25,6 +25,8 @@ module measurements
  double precision, dimension(:), allocatable  :: nLs_mc
  double precision, dimension(:), allocatable  :: Sp_mc
  double precision, dimension(:), allocatable  :: Bp_mc
+ double precision, dimension(:), allocatable  :: Sp1_mc
+ double precision, dimension(:), allocatable  :: Bp1_mc
 
  !Below are for binned quantites
  double precision, dimension(:), allocatable  :: benergy
@@ -110,6 +112,8 @@ contains
  allocate(nLs_mc(0:Nbi-1)) 
  allocate(Sp_mc(0:Nbi-1))
  allocate(Bp_mc(0:Nbi-1))
+ allocate(Sp1_mc(0:Nbi-1))
+ allocate(Bp1_mc(0:Nbi-1))
  allocate(bsp_site_avg(nbin))
  allocate(bbp_site_avg(nbin))
  allocate(bspolaron(0:Nbi-1, nbin))
@@ -151,6 +155,8 @@ end subroutine allocate_quantities
  deallocate(nLs_mc)
  deallocate(Sp_mc)
  deallocate(Bp_mc)
+ deallocate(Sp1_mc)
+ deallocate(Bp1_mc)
  deallocate(bspolaron)
  deallocate(bbpolaron)
  deallocate(bspolaron_ij)
@@ -262,6 +268,8 @@ end subroutine allocate_quantities
  nLs_mc = 0.0d0
  Sp_mc = 0.0d0
  Bp_mc = 0.0d0
+ Sp1_mc = 0.0d0
+ Bp1_mc = 0.0d0
 
  cnt = cnt + 1
  call compute_total_E(energy,X)
@@ -341,7 +349,8 @@ end subroutine allocate_quantities
 
      !record quantities for each MC measurement
      if (if_print_MC==1) then
-       Sp_mc(i) = Sp_mc(i) + tmp1
+       Sp_mc(i)  = Sp_mc(i) + tmp1
+       Sp1_mc(i) = Sp1_mc(i) + 2.0d0*fermi*a_inn2
      endif
 
      !Also compute single polaron density for two sublattices
@@ -373,6 +382,7 @@ end subroutine allocate_quantities
        !record quantities for each MC measurement
        if (if_print_MC==1) then
          Bp_mc(i) = Bp_mc(i) + tmp1
+         Bp1_mc(i) = Bp1_mc(i) + fermi*fermi1* a_inn2*a_innp2
        endif
 
        !Also compute bipolaron density for two sublattices
@@ -452,8 +462,10 @@ end subroutine allocate_quantities
       write(unit=16,fmt=530)  nLs_mc(i)
       write(unit=17,fmt=530)  Sp_mc(i)/Xi_A1g
       write(unit=18,fmt=530)  Bp_mc(i)/Xi_A1g
-      write(unit=19,fmt=530)  Sp_mc(i)
-      write(unit=20,fmt=530)  Bp_mc(i)
+      write(unit=19,fmt=530)  Sp1_mc(i)
+      write(unit=20,fmt=530)  Bp1_mc(i)
+      write(unit=21,fmt=530)  Sp_mc(i)
+      write(unit=22,fmt=530)  Bp_mc(i)
     endif
 
    enddo
