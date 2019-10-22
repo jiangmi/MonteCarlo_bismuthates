@@ -12,6 +12,7 @@ module parameters
  integer num_beta_steps
  integer nwarms, ninv, nmeas, nbin, nbeta
  integer if_X_displace                   ! No displacement for checking code
+ integer if_print_MC
  double precision mu
  double precision tsp                    !O-Bi overlap integral
  double precision tpp                    !O-O overlap integral
@@ -42,6 +43,7 @@ contains
  alpha = alphaval
  spring_const = springval
  if_X_displace = 1
+ if_print_MC = 1
  dXamp = dXampval
 
  nbeta = nbetaval
@@ -55,9 +57,25 @@ contains
 
  !======================================================
  ! Initialize files for recording results VS temperature
- 510 format(a80)
+ 510 format(a170)
  open(unit=11,file='dirval'//'/data_'//'fnameval'//'.txt',status="replace")
- write(unit=11,fmt=510) 'beta    n_avg    n_err    E_avg    E_err    sp_avg    sp_err    bp_avg    bp_err'
+ write(unit=11,fmt=510) 'beta     n_avg      n_err      E_avg      E_err      |X|      sp_avg      sp_err     bp_avg     bp_err    chi_s     chi_s_err    chi_px    chi_px_err   chi_py   chi_py_err'
+
+ 520 format(a142)
+ open(unit=12,file='dirval'//'/data_sublat_'//'fnameval'//'.txt',status="replace")
+ write(unit=12,fmt=520) 'beta     n_avg      n_Bi1      n_Bi2      n_px1      n_px2     n_py1      n_py2      n_A1g1     n_A1g2      Sp1        Sp2       Bp1       Bp2'
+
+ ! Print various quantities along the MC updates
+ if (if_print_MC==1) then
+   open(unit=13,file='dirval'//'/MC_Xa1g_'//'fnameval'//'.txt',status="replace")
+   open(unit=14,file='dirval'//'/MC_ns_'//'fnameval'//'.txt',status="replace")
+   open(unit=15,file='dirval'//'/MC_npx_'//'fnameval'//'.txt',status="replace")
+   open(unit=16,file='dirval'//'/MC_nLs_'//'fnameval'//'.txt',status="replace")
+   open(unit=17,file='dirval'//'/MC_Sp_Xa1g_'//'fnameval'//'.txt',status="replace")
+   open(unit=18,file='dirval'//'/MC_Bp_Xa1g_'//'fnameval'//'.txt',status="replace")
+   open(unit=19,file='dirval'//'/MC_Sp_'//'fnameval'//'.txt',status="replace")
+   open(unit=20,file='dirval'//'/MC_Bp_'//'fnameval'//'.txt',status="replace")
+ endif
 
  return
  end subroutine init_parameters

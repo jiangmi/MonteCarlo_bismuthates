@@ -4,9 +4,14 @@
 200 format(a6, i3, a30, ' ',f8.5,' +- ',f8.5)
 300 format(a6, i3, ' ', i3, a30, ' ',f8.5,' +- ',f8.5)
 400 format(a6, f4.1, a1, f4.1, a1)
-410 format(a5, i3, a11, f9.5, f9.5)
+410 format(a18, f9.5, f9.5)
 420 format(a5, i3, i3, a11, f9.5, f9.5) 
-800 format(f4.1,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5)
+800 format(f5.1,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ', &
+           f10.5,' ',f10.5,' ',f10.5,' ',f10.5, ' ', f10.5, ' ', &
+           f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5)
+810 format(f5.1,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ', &
+           f10.5,' ',f10.5,' ',f10.5,' ',f10.5, ' ', f10.5, ' ', &
+           f10.5,' ',f10.5,' ',f10.5,' ',f10.5)
 
 !print results into out.txt
 write(unit=6,fmt=110) '  es = ', es
@@ -37,6 +42,38 @@ write(unit=6,fmt=100) '  A1g Oxygen holes = ', mean, std
 call get_err(bsp_site_avg,spmean,spstd)
 write(unit=6,fmt=100) '  Lattice-averaged single polaron = ', spmean, spstd
 
+!compute sublat dependent quantities
+call get_err(bnbi1,means(1),std)
+write(unit=6,fmt=100) '  <n_Bi> sublat1 = ', means(1), std
+call get_err(bnbi2,means(2),std)
+write(unit=6,fmt=100) '  <n_Bi> sublat2 = ', means(2), std
+
+call get_err(bnpx1,means(3),std)
+write(unit=6,fmt=100) '  <n_px> sublat1 = ', means(3), std
+call get_err(bnpx2,means(4),std)
+write(unit=6,fmt=100) '  <n_px> sublat2 = ', means(4), std
+
+call get_err(bnpy1,means(5),std)
+write(unit=6,fmt=100) '  <n_py> sublat1 = ', means(5), std
+call get_err(bnpy2,means(6),std)
+write(unit=6,fmt=100) '  <n_py> sublat2 = ', means(6), std
+
+call get_err(bnpA1g1,means(7),std)
+write(unit=6,fmt=100) '  <n_A1g> sublat1 = ', means(7), std
+call get_err(bnpA1g2,means(8),std)
+write(unit=6,fmt=100) '  <n_A1g> sublat2 = ', means(8), std
+
+call get_err(bsp1,means(9),std)
+write(unit=6,fmt=100) '  <Sp> sublat1 = ', means(9), std
+call get_err(bsp2,means(10),std)
+write(unit=6,fmt=100) '  <Sp> sublat2 = ', means(10), std
+
+call get_err(bbp1,means(11),std)
+write(unit=6,fmt=100) '  <Bp> sublat1 = ', means(11), std
+call get_err(bbp2,means(12),std)
+write(unit=6,fmt=100) '  <Bp> sublat2 = ', means(12), std
+
+!quantities for each site
 do ii = 0,Nbi-1                                                                                       
   call get_err(bnbis(ii,:),mean,std)                                                              
   write(unit=6,fmt=200) 'cell', ii, '  <n_Bi> = ', mean, std                                  
@@ -55,8 +92,6 @@ enddo
 call get_err(bbp_site_avg,bpmean,bpstd)
 write(unit=6,fmt=100) '  Lattice-averaged bipolaron = ', bpmean, bpstd
 
-!print results into data.txt
-write(unit=11,fmt=800) beta, Nmean, Nstd, Emean, Estd, spmean, spstd, bpmean, bpstd
 
 do ii = 0,Nbi-1
   call get_err(bbpolaron(ii,:),mean,std)
@@ -74,10 +109,22 @@ do k = 0,nclass-1
 enddo
 
 !print s-wave susceptibility chi_sc(orb)                               
-do o1 = 0,Norb-1
-  call get_err(bchi_sc(o1,:),mean,std)
-  write(unit=6,fmt=410) 'orb', o1, '  chi_sc = ', mean, std
-enddo
+call get_err(bchi_sc(0,:), swave_s_mean, swave_s_std)
+write(unit=6,fmt=410) 'orb  s,  chi_sc = ', swave_s_mean, swave_s_std
+call get_err(bchi_sc(1,:), swave_px_mean, swave_px_std)
+write(unit=6,fmt=410) 'orb px,  chi_sc = ', swave_px_mean, swave_px_std
+call get_err(bchi_sc(2,:), swave_py_mean, swave_py_std)
+write(unit=6,fmt=410) 'orb py,  chi_sc = ', swave_py_mean, swave_py_std
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!print results into data.txt
+write(unit=11,fmt=800) beta, Nmean, Nstd, Emean, Estd, Xavg, &
+                       spmean, spstd, bpmean, bpstd,   &
+                       swave_s_mean, swave_s_std,      &
+                       swave_px_mean, swave_px_std,    &
+                       swave_py_mean, swave_py_std
+write(unit=12,fmt=810) beta, Nmean, means(1:12)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !print charge susceptibility chi_ch(q)
 do k = 0,nclass-1

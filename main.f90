@@ -13,8 +13,13 @@ use monte_carlo
 use measurements
 implicit none
 integer ii,jj,i,j,k,ix,iy, bin, ibeta
-double precision mean,std,Emean,Estd,Nmean,Nstd,spmean,spstd,bpmean,bpstd
-double precision t1, t2, Xval, Etot
+double precision mean,std,Emean,Estd,Nmean,Nstd, &
+                 spmean,spstd,bpmean,bpstd,      &
+                 swave_s_mean, swave_s_std,      &
+                 swave_px_mean, swave_px_std,    &
+                 swave_py_mean, swave_py_std
+double precision means(12)  ! store sublat dependent quantities
+double precision t1, t2, Xval, Etot, Xavg
 double precision, dimension(:),   allocatable :: X
 double precision, dimension(:,:), allocatable :: H0
 
@@ -35,7 +40,7 @@ allocate(H0(0:N-1,0:N-1))
 
 !Initialize the displacement to zero and then a small value
 X = 0.0d0
-if (if_X_displace==1) then
+!if (if_X_displace==1) then
   !random initial X
   do i = 0,N-1
    if(.not.is_bismuth(i))then
@@ -63,7 +68,7 @@ if (if_X_displace==1) then
   !    endif
   !  enddo
   !enddo
-endif
+!endif
 
 ! Loop over temperature starting from highest T
 do ibeta = 1,nbeta
@@ -87,7 +92,12 @@ do ibeta = 1,nbeta
   call single_site_sweep(X,accept,reject)
  enddo
 
- print *, 'warmup finished, X=', X(Nbi:N-1)
+ print *, 'warmup finished, X='
+ do ii=Nbi,N-1
+   print *, X(ii)
+ enddo
+ print *, '<|X|> =', sum(abs(X(Nbi:N-1)))/(N*2/3)
+
  call compute_total_E(Etot, X)
  print *, 'warmup finished, total E=', Etot
  
@@ -112,7 +122,13 @@ do ibeta = 1,nbeta
   call do_measurements(X)
  enddo
 
- print *, 'meas finished, X=', X(Nbi:N-1)
+ print *, 'meas finished, X='
+ do ii=Nbi,N-1
+   print *, X(ii)
+ enddo
+ Xavg = sum(abs(X(Nbi:N-1)))/(N*2/3)
+ print *, '<|X|> =', Xavg
+
  call compute_total_E(Etot, X)
  print *, 'meas finished, total E=', Etot
  print *, '===================================='
