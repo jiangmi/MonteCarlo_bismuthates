@@ -12,6 +12,7 @@
 810 format(f5.1,' ',f10.5,' ',f10.5,' ',f10.5,' ',f10.5,' ', &
            f10.5,' ',f10.5,' ',f10.5,' ',f10.5, ' ', f10.5, ' ', &
            f10.5,' ',f10.5,' ',f10.5,' ',f10.5)
+820 format(f13.5, f13.5)
 
 !print results into out.txt
 write(unit=6,fmt=110) '  es = ', es
@@ -22,6 +23,12 @@ write(unit=6,fmt=110) '  mu = ', mu
 write(unit=6,fmt=110) '  alpha = ', alpha
 write(unit=6,fmt=110) '  spring_const = ', spring_const
 write(unit=6,fmt=110) '  beta = ', beta
+
+!print the spectrum of H
+do ii = 0,N-1
+  call get_err(bEk(ii,:),mean,std)
+  write(unit=30,fmt=820)  mean, std
+enddo
 
 call get_err(benergy,Emean,Estd)
 write(unit=6,fmt=100) '  E_avg = ', Emean, Estd

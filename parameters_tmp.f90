@@ -65,6 +65,8 @@ contains
  open(unit=12,file='dirval'//'/data_sublat_'//'fnameval'//'.txt',status="replace")
  write(unit=12,fmt=520) 'beta     n_avg      n_Bi1      n_Bi2      n_px1      n_px2     n_py1      n_py2      n_A1g1     n_A1g2      Sp1        Sp2       Bp1       Bp2'
 
+ open(unit=30,file='dirval'//'/Ek_'//'fnameval'//'.txt',status="replace")
+
  ! Print various quantities along the MC updates
  if (if_print_MC==1) then
    open(unit=13,file='dirval'//'/MC_Xa1g_'//'fnameval'//'.txt',status="replace")

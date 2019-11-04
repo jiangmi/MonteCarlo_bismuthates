@@ -11,6 +11,7 @@ module measurements
  double precision abp_site_avg
  double precision anbi1, anbi2, anpx1, anpx2, anpy1, anpy2
  double precision anpA1g1, anpA1g2, asp1, asp2, abp1, abp2
+ double precision, dimension(:), allocatable  :: aEk
  double precision, dimension(:), allocatable  :: anbis
  double precision, dimension(:), allocatable  :: anpa1g
  double precision, dimension(:), allocatable  :: aspolaron
@@ -54,6 +55,7 @@ module measurements
  double precision, dimension(:), allocatable  :: bbp1
  double precision, dimension(:), allocatable  :: bbp2
 
+ double precision, dimension(:,:), allocatable  :: bEk
  double precision, dimension(:,:), allocatable  :: bnbis
  double precision, dimension(:,:), allocatable  :: bnpa1g
  double precision, dimension(:,:), allocatable :: bspolaron
@@ -78,6 +80,7 @@ contains
  subroutine allocate_quantities()
  use parameters
  implicit none
+ allocate(aEk(0:N-1))
  allocate(anbis(0:Nbi-1))
  allocate(anpa1g(0:Nbi-1))
  allocate(aspolaron(0:Nbi-1))
@@ -105,6 +108,7 @@ contains
  allocate(bsp2(nbin))
  allocate(bbp1(nbin))
  allocate(bbp2(nbin))
+ allocate(bEk(0:N-1, nbin))
  allocate(bnbis(0:Nbi-1, nbin))
  allocate(bnpa1g(0:Nbi-1, nbin))
  allocate(ns_mc(0:Nbi-1))
@@ -125,6 +129,7 @@ end subroutine allocate_quantities
  !=============================================================================
  subroutine deallocate_quantities()
  implicit none
+ deallocate(aEk)
  deallocate(anbis)
  deallocate(anpa1g)
  deallocate(aspolaron)
@@ -134,6 +139,7 @@ end subroutine allocate_quantities
  deallocate(achi_ch)
  deallocate(bnbis_avg)
  deallocate(bnpa1g_avg)
+ deallocate(bEk)
  deallocate(bnbis)
  deallocate(bnpa1g)
  deallocate(bsp_site_avg)
@@ -173,6 +179,7 @@ end subroutine allocate_quantities
  ax2 = 0.0d0
  anox = 0.0d0
  anoy = 0.0d0
+ aEk = 0.0d0
  anbis = 0.0d0
  antot = 0.0d0
  anpa1g = 0.0d0
@@ -211,6 +218,7 @@ end subroutine allocate_quantities
  bnox(bin) = anox/dfloat(cnt)
  bnoy(bin) = anoy/dfloat(cnt)
  bnpa1g_avg(bin) = anpa1g_avg/dfloat(cnt)
+ bEk(:,bin) = aEk/dfloat(cnt)
  bnbis(:,bin) = anbis/dfloat(cnt)
  bnpa1g(:,bin) = anpa1g/dfloat(cnt)
  bsp_site_avg(bin) = asp_site_avg/dfloat(cnt)
@@ -288,6 +296,8 @@ end subroutine allocate_quantities
  if (info.ne.0) then
     print *,"dsyev error", N, lwork, info
  endif
+
+ aEk = aEk + Ek
 
  !loop over Bi sites
  do ix = 0,Nx-1
