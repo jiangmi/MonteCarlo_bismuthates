@@ -69,12 +69,12 @@ contains
 
  ! Print various quantities along the MC updates
  if (if_print_MC==1) then
-   open(unit=13,file='dirval'//'/MC_Xa1g_'//'fnameval'//'.txt',status="replace")
+   open(unit=13,file='dirval'//'/MC_XLs_'//'fnameval'//'.txt',status="replace")
    open(unit=14,file='dirval'//'/MC_ns_'//'fnameval'//'.txt',status="replace")
    open(unit=15,file='dirval'//'/MC_npx_'//'fnameval'//'.txt',status="replace")
    open(unit=16,file='dirval'//'/MC_nLs_'//'fnameval'//'.txt',status="replace")
-   open(unit=17,file='dirval'//'/MC_Sp_Xa1g_'//'fnameval'//'.txt',status="replace")
-   open(unit=18,file='dirval'//'/MC_Bp_Xa1g_'//'fnameval'//'.txt',status="replace")
+   open(unit=17,file='dirval'//'/MC_Sp_XLs_'//'fnameval'//'.txt',status="replace")
+   open(unit=18,file='dirval'//'/MC_Bp_XLs_'//'fnameval'//'.txt',status="replace")
    open(unit=19,file='dirval'//'/MC_Sp_Ls_'//'fnameval'//'.txt',status="replace")
    open(unit=20,file='dirval'//'/MC_Bp_Ls_'//'fnameval'//'.txt',status="replace")
    open(unit=21,file='dirval'//'/MC_Sp_'//'fnameval'//'.txt',status="replace")

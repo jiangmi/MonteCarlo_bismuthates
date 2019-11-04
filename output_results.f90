@@ -44,8 +44,8 @@ call get_err(bnox,mean,std)
 write(unit=6,fmt=100) '  O(x) filling = ', mean, std
 call get_err(bnoy,mean,std)
 write(unit=6,fmt=100) '  O(y) filling = ', mean, std
-call get_err(bnpa1g_avg,mean,std)
-write(unit=6,fmt=100) '  A1g Oxygen holes = ', mean, std
+call get_err(bnpLs_avg,mean,std)
+write(unit=6,fmt=100) '  Ls Oxygen holes = ', mean, std
 call get_err(bsp_site_avg,spmean,spstd)
 write(unit=6,fmt=100) '  Lattice-averaged single polaron = ', spmean, spstd
 
@@ -65,10 +65,10 @@ write(unit=6,fmt=100) '  <n_py> sublat1 = ', means(5), std
 call get_err(bnpy2,means(6),std)
 write(unit=6,fmt=100) '  <n_py> sublat2 = ', means(6), std
 
-call get_err(bnpA1g1,means(7),std)
-write(unit=6,fmt=100) '  <n_A1g> sublat1 = ', means(7), std
-call get_err(bnpA1g2,means(8),std)
-write(unit=6,fmt=100) '  <n_A1g> sublat2 = ', means(8), std
+call get_err(bnpLs1,means(7),std)
+write(unit=6,fmt=100) '  <n_Ls> sublat1 = ', means(7), std
+call get_err(bnpLs2,means(8),std)
+write(unit=6,fmt=100) '  <n_Ls> sublat2 = ', means(8), std
 
 call get_err(bsp1,means(9),std)
 write(unit=6,fmt=100) '  <Sp> sublat1 = ', means(9), std
@@ -87,8 +87,8 @@ do ii = 0,Nbi-1
 enddo
 
 do ii = 0,Nbi-1
-  call get_err(bnpa1g(ii,:),mean,std)    
-  write(unit=6,fmt=200) 'cell', ii, '  <n_p_A1g> = ', mean, std        
+  call get_err(bnpLs(ii,:),mean,std)    
+  write(unit=6,fmt=200) 'cell', ii, '  <n_p_Ls> = ', mean, std        
 enddo
 
 do ii = 0,Nbi-1

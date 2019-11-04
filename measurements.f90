@@ -6,14 +6,14 @@ module measurements
  ! accumulated quantites
  double precision aenergy, ax, ax2
  double precision antot, anbis_avg, anox, anoy
- double precision anpa1g_avg  !Number of oxygen holes with A1g symmetry
+ double precision anpLs_avg  !Number of oxygen holes with Ls symmetry
  double precision asp_site_avg
  double precision abp_site_avg
  double precision anbi1, anbi2, anpx1, anpx2, anpy1, anpy2
- double precision anpA1g1, anpA1g2, asp1, asp2, abp1, abp2
+ double precision anpLs1, anpLs2, asp1, asp2, abp1, abp2
  double precision, dimension(:), allocatable  :: aEk
  double precision, dimension(:), allocatable  :: anbis
- double precision, dimension(:), allocatable  :: anpa1g
+ double precision, dimension(:), allocatable  :: anpLs
  double precision, dimension(:), allocatable  :: aspolaron
  double precision, dimension(:), allocatable  :: abpolaron
  double precision, dimension(:), allocatable  :: aspolaron_ij
@@ -37,7 +37,7 @@ module measurements
  double precision, dimension(:), allocatable  :: bnox
  double precision, dimension(:), allocatable  :: bnoy
  double precision, dimension(:), allocatable  :: bntot
- double precision, dimension(:), allocatable  :: bnpa1g_avg
+ double precision, dimension(:), allocatable  :: bnpLs_avg
  double precision, dimension(:), allocatable  :: bsp_site_avg
  double precision, dimension(:), allocatable  :: bbp_site_avg
 
@@ -48,8 +48,8 @@ module measurements
  double precision, dimension(:), allocatable  :: bnpx2
  double precision, dimension(:), allocatable  :: bnpy1
  double precision, dimension(:), allocatable  :: bnpy2
- double precision, dimension(:), allocatable  :: bnpA1g1
- double precision, dimension(:), allocatable  :: bnpA1g2
+ double precision, dimension(:), allocatable  :: bnpLs1
+ double precision, dimension(:), allocatable  :: bnpLs2
  double precision, dimension(:), allocatable  :: bsp1
  double precision, dimension(:), allocatable  :: bsp2
  double precision, dimension(:), allocatable  :: bbp1
@@ -57,7 +57,7 @@ module measurements
 
  double precision, dimension(:,:), allocatable  :: bEk
  double precision, dimension(:,:), allocatable  :: bnbis
- double precision, dimension(:,:), allocatable  :: bnpa1g
+ double precision, dimension(:,:), allocatable  :: bnpLs
  double precision, dimension(:,:), allocatable :: bspolaron
  double precision, dimension(:,:), allocatable :: bbpolaron
  double precision, dimension(:,:), allocatable :: bspolaron_ij
@@ -82,7 +82,7 @@ contains
  implicit none
  allocate(aEk(0:N-1))
  allocate(anbis(0:Nbi-1))
- allocate(anpa1g(0:Nbi-1))
+ allocate(anpLs(0:Nbi-1))
  allocate(aspolaron(0:Nbi-1))
  allocate(abpolaron(0:Nbi-1))
  allocate(aspolaron_ij(0:nclass-1))
@@ -95,22 +95,22 @@ contains
  allocate(bnox(nbin))
  allocate(bnoy(nbin))
  allocate(bntot(nbin))
- allocate(bnpa1g_avg(nbin))
+ allocate(bnpLs_avg(nbin))
  allocate(bnbi1(nbin))
  allocate(bnbi2(nbin))
  allocate(bnpx1(nbin))
  allocate(bnpx2(nbin))
  allocate(bnpy1(nbin))
  allocate(bnpy2(nbin))
- allocate(bnpA1g1(nbin))
- allocate(bnpA1g2(nbin))
+ allocate(bnpLs1(nbin))
+ allocate(bnpLs2(nbin))
  allocate(bsp1(nbin))
  allocate(bsp2(nbin))
  allocate(bbp1(nbin))
  allocate(bbp2(nbin))
  allocate(bEk(0:N-1, nbin))
  allocate(bnbis(0:Nbi-1, nbin))
- allocate(bnpa1g(0:Nbi-1, nbin))
+ allocate(bnpLs(0:Nbi-1, nbin))
  allocate(ns_mc(0:Nbi-1))
  allocate(npx_mc(0:Nbi-1))
  allocate(nLs_mc(0:Nbi-1)) 
@@ -131,17 +131,17 @@ end subroutine allocate_quantities
  implicit none
  deallocate(aEk)
  deallocate(anbis)
- deallocate(anpa1g)
+ deallocate(anpLs)
  deallocate(aspolaron)
  deallocate(abpolaron)
  deallocate(aspolaron_ij)
  deallocate(achi_sc)
  deallocate(achi_ch)
  deallocate(bnbis_avg)
- deallocate(bnpa1g_avg)
+ deallocate(bnpLs_avg)
  deallocate(bEk)
  deallocate(bnbis)
- deallocate(bnpa1g)
+ deallocate(bnpLs)
  deallocate(bsp_site_avg)
  deallocate(bbp_site_avg)
  deallocate(bnbi1)
@@ -150,8 +150,8 @@ end subroutine allocate_quantities
  deallocate(bnpx2)
  deallocate(bnpy1)
  deallocate(bnpy2)
- deallocate(bnpA1g1)
- deallocate(bnpA1g2)
+ deallocate(bnpLs1)
+ deallocate(bnpLs2)
  deallocate(bsp1)
  deallocate(bsp2)
  deallocate(bbp1)
@@ -182,9 +182,9 @@ end subroutine allocate_quantities
  aEk = 0.0d0
  anbis = 0.0d0
  antot = 0.0d0
- anpa1g = 0.0d0
+ anpLs = 0.0d0
  anbis_avg = 0.0d0
- anpa1g_avg = 0.0d0
+ anpLs_avg = 0.0d0
  asp_site_avg = 0.d0
  abp_site_avg = 0.d0
  aspolaron = 0.0d0
@@ -195,8 +195,8 @@ end subroutine allocate_quantities
  anpx2 = 0.0d0
  anpy1 = 0.0d0
  anpy2 = 0.0d0
- anpA1g1 = 0.0d0
- anpA1g2 = 0.0d0
+ anpLs1 = 0.0d0
+ anpLs2 = 0.0d0
  asp1 = 0.0d0
  asp2 = 0.0d0
  abp1 = 0.0d0
@@ -217,10 +217,10 @@ end subroutine allocate_quantities
  bnbis_avg(bin) = anbis_avg/dfloat(cnt)
  bnox(bin) = anox/dfloat(cnt)
  bnoy(bin) = anoy/dfloat(cnt)
- bnpa1g_avg(bin) = anpa1g_avg/dfloat(cnt)
+ bnpLs_avg(bin) = anpLs_avg/dfloat(cnt)
  bEk(:,bin) = aEk/dfloat(cnt)
  bnbis(:,bin) = anbis/dfloat(cnt)
- bnpa1g(:,bin) = anpa1g/dfloat(cnt)
+ bnpLs(:,bin) = anpLs/dfloat(cnt)
  bsp_site_avg(bin) = asp_site_avg/dfloat(cnt)
  bbp_site_avg(bin) = abp_site_avg/dfloat(cnt)
 
@@ -230,8 +230,8 @@ end subroutine allocate_quantities
  bnpx2(bin) = anpx2/dfloat(cnt)
  bnpy1(bin) = anpy1/dfloat(cnt)
  bnpy2(bin) = anpy2/dfloat(cnt)
- bnpA1g1(bin) = anpA1g1/dfloat(cnt)
- bnpA1g2(bin) = anpA1g2/dfloat(cnt)
+ bnpLs1(bin) = anpLs1/dfloat(cnt)
+ bnpLs2(bin) = anpLs2/dfloat(cnt)
  bsp1(bin) = asp1/dfloat(cnt)
  bsp2(bin) = asp2/dfloat(cnt)
  bbp1(bin) = abp1/dfloat(cnt)
@@ -260,7 +260,7 @@ end subroutine allocate_quantities
  integer lwork
  double precision, dimension(0:N-1,0:N-1) :: U
  double precision, allocatable, dimension(:) :: work
- double precision Xi_A1g, Xj_A1g
+ double precision Xi_Ls, Xj_Ls
  double precision a_inn, a_inn2, a_jnn, a_jnn2
  double precision a_innp, a_innp2, a_jnnp, a_jnnp2
  double precision s_inn, s_inn2, s_innp, s_innp2
@@ -307,7 +307,7 @@ end subroutine allocate_quantities
    iyp = return_index_for_coordinates(ix,iy,2) 
    ixm = return_index_for_coordinates(ix-1,iy,1)
    iym = return_index_for_coordinates(ix,iy-1,2)
-   Xi_A1g = -0.5d0*(X(ixp) - X(ixm) + X(iyp) - X(iym))
+   Xi_Ls = -0.5d0*(X(ixp) - X(ixm) + X(iyp) - X(iym))
 
    !sum over eigenstates
    do nn = 0,N-1  
@@ -327,8 +327,8 @@ end subroutine allocate_quantities
      a_inn2 = a_inn*a_inn
      s_inn2 = s_inn*s_inn
 
-     anpa1g(i)  = anpa1g(i) + fac*a_inn2*Nbi
-     anpa1g_avg = anpa1g_avg + fac*a_inn2
+     anpLs(i)  = anpLs(i) + fac*a_inn2*Nbi
+     anpLs_avg = anpLs_avg + fac*a_inn2
 
      !record quantities for each MC measurement
      if (if_print_MC==1) then
@@ -343,17 +343,17 @@ end subroutine allocate_quantities
        anbi1 = anbi1 + tmp1/0.5
        anpx1 = anpx1 + tmp2/0.5
        anpy1 = anpy1 + tmp3/0.5
-       anpA1g1 = anpA1g1 + fac*a_inn2/0.5
+       anpLs1 = anpLs1 + fac*a_inn2/0.5
      else
        anbi2 = anbi2 + tmp1/0.5
        anpx2 = anpx2 + tmp2/0.5
        anpy2 = anpy2 + tmp3/0.5
-       anpA1g2 = anpA1g2 + fac*a_inn2/0.5
+       anpLs2 = anpLs2 + fac*a_inn2/0.5
      endif
 
      ! aspolaron does not need Nbi because of (i) index
-     tmp1 = 2.0d0*fermi*Xi_A1g*(s_inn2 + a_inn2)
-    ! aspolaron(i) = aspolaron(i) + Xi_A1g*tmp1
+     tmp1 = 2.0d0*fermi*Xi_Ls*(s_inn2 + a_inn2)
+    ! aspolaron(i) = aspolaron(i) + Xi_Ls*tmp1
      aspolaron(i) = aspolaron(i) + tmp1
      asp_site_avg = asp_site_avg + tmp1/Nbi
 
@@ -384,7 +384,7 @@ end subroutine allocate_quantities
        a_innp2 = a_innp*a_innp
        s_innp2 = s_innp*s_innp
        
-       tmp1 = fermi*fermi1* Xi_A1g*   &
+       tmp1 = fermi*fermi1* Xi_Ls*   &
               (s_inn2 + a_inn2)*(s_innp2 + a_innp2)
        abpolaron(i) = abpolaron(i) + tmp1
        abp_site_avg = abp_site_avg + tmp1/Nbi
@@ -417,13 +417,13 @@ end subroutine allocate_quantities
            !!!!!!!!!!!!!!!!!!!!!!!!
            !!       <L_i*L_j>    !!
            !!!!!!!!!!!!!!!!!!!!!!!!
-           Xj_A1g = -0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
+           Xj_Ls = -0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
            a_jnnp = 0.5d0*(U(jxp,nnp) - U(jxm,nnp) + U(jyp,nnp) - U(jym,nnp))
            a_jnn  = 0.5d0*(U(jxp,nn) - U(jxm,nn) + U(jyp,nn) - U(jym,nn))
            a_jnn2  = a_jnn *a_jnn
            a_jnnp2 = a_jnnp*a_jnnp
 
-           factor = fac*fac1*Xi_A1g*Xj_A1g/dclass_F(k)
+           factor = fac*fac1*Xi_Ls*Xj_Ls/dclass_F(k)
            aspolaron_ij(k) = aspolaron_ij(k) + factor*(          &
                                       s_inn2*s_jnnp2             &
                                     - s_inn*s_jnn*s_innp*s_jnnp  &
@@ -466,12 +466,12 @@ end subroutine allocate_quantities
     !Print quantities for each MC measurement
     if (if_print_MC==1) then
       530 format(f13.5)
-      write(unit=13,fmt=530)  Xi_A1g
+      write(unit=13,fmt=530)  Xi_Ls
       write(unit=14,fmt=530)  ns_mc(i)
       write(unit=15,fmt=530)  npx_mc(i)
       write(unit=16,fmt=530)  nLs_mc(i)
-      write(unit=17,fmt=530)  Sp_mc(i)/Xi_A1g
-      write(unit=18,fmt=530)  Bp_mc(i)/Xi_A1g
+      write(unit=17,fmt=530)  Sp_mc(i)/Xi_Ls
+      write(unit=18,fmt=530)  Bp_mc(i)/Xi_Ls
       write(unit=19,fmt=530)  Sp1_mc(i)
       write(unit=20,fmt=530)  Bp1_mc(i)
       write(unit=21,fmt=530)  Sp_mc(i)
