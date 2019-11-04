@@ -7,6 +7,7 @@ module measurements
  double precision aenergy, ax, ax2
  double precision antot, anbis_avg, anox, anoy
  double precision anpLs_avg  !Number of oxygen holes with Ls symmetry
+ double precision anpLd_avg, anpLx_avg, anpLy_avg
  double precision asp_site_avg
  double precision abp_site_avg
  double precision anbi1, anbi2, anpx1, anpx2, anpy1, anpy2
@@ -14,6 +15,9 @@ module measurements
  double precision, dimension(:), allocatable  :: aEk
  double precision, dimension(:), allocatable  :: anbis
  double precision, dimension(:), allocatable  :: anpLs
+ double precision, dimension(:), allocatable  :: anpLd
+ double precision, dimension(:), allocatable  :: anpLx
+ double precision, dimension(:), allocatable  :: anpLy
  double precision, dimension(:), allocatable  :: aspolaron
  double precision, dimension(:), allocatable  :: abpolaron
  double precision, dimension(:), allocatable  :: aspolaron_ij
@@ -24,6 +28,9 @@ module measurements
  double precision, dimension(:), allocatable  :: ns_mc
  double precision, dimension(:), allocatable  :: npx_mc
  double precision, dimension(:), allocatable  :: nLs_mc
+ double precision, dimension(:), allocatable  :: nLd_mc
+ double precision, dimension(:), allocatable  :: nLx_mc
+ double precision, dimension(:), allocatable  :: nLy_mc
  double precision, dimension(:), allocatable  :: Sp_mc
  double precision, dimension(:), allocatable  :: Bp_mc
  double precision, dimension(:), allocatable  :: Sp1_mc
@@ -38,6 +45,9 @@ module measurements
  double precision, dimension(:), allocatable  :: bnoy
  double precision, dimension(:), allocatable  :: bntot
  double precision, dimension(:), allocatable  :: bnpLs_avg
+ double precision, dimension(:), allocatable  :: bnpLd_avg
+ double precision, dimension(:), allocatable  :: bnpLx_avg
+ double precision, dimension(:), allocatable  :: bnpLy_avg
  double precision, dimension(:), allocatable  :: bsp_site_avg
  double precision, dimension(:), allocatable  :: bbp_site_avg
 
@@ -58,6 +68,9 @@ module measurements
  double precision, dimension(:,:), allocatable  :: bEk
  double precision, dimension(:,:), allocatable  :: bnbis
  double precision, dimension(:,:), allocatable  :: bnpLs
+ double precision, dimension(:,:), allocatable  :: bnpLd
+ double precision, dimension(:,:), allocatable  :: bnpLx
+ double precision, dimension(:,:), allocatable  :: bnpLy
  double precision, dimension(:,:), allocatable :: bspolaron
  double precision, dimension(:,:), allocatable :: bbpolaron
  double precision, dimension(:,:), allocatable :: bspolaron_ij
@@ -83,6 +96,9 @@ contains
  allocate(aEk(0:N-1))
  allocate(anbis(0:Nbi-1))
  allocate(anpLs(0:Nbi-1))
+ allocate(anpLd(0:Nbi-1))
+ allocate(anpLx(0:Nbi-1))
+ allocate(anpLy(0:Nbi-1))
  allocate(aspolaron(0:Nbi-1))
  allocate(abpolaron(0:Nbi-1))
  allocate(aspolaron_ij(0:nclass-1))
@@ -96,6 +112,9 @@ contains
  allocate(bnoy(nbin))
  allocate(bntot(nbin))
  allocate(bnpLs_avg(nbin))
+ allocate(bnpLd_avg(nbin))
+ allocate(bnpLx_avg(nbin))
+ allocate(bnpLy_avg(nbin))
  allocate(bnbi1(nbin))
  allocate(bnbi2(nbin))
  allocate(bnpx1(nbin))
@@ -111,9 +130,15 @@ contains
  allocate(bEk(0:N-1, nbin))
  allocate(bnbis(0:Nbi-1, nbin))
  allocate(bnpLs(0:Nbi-1, nbin))
+ allocate(bnpLd(0:Nbi-1, nbin))
+ allocate(bnpLx(0:Nbi-1, nbin))
+ allocate(bnpLy(0:Nbi-1, nbin))
  allocate(ns_mc(0:Nbi-1))
  allocate(npx_mc(0:Nbi-1))
  allocate(nLs_mc(0:Nbi-1)) 
+ allocate(nLd_mc(0:Nbi-1))
+ allocate(nLx_mc(0:Nbi-1))
+ allocate(nLy_mc(0:Nbi-1))
  allocate(Sp_mc(0:Nbi-1))
  allocate(Bp_mc(0:Nbi-1))
  allocate(Sp1_mc(0:Nbi-1))
@@ -131,17 +156,17 @@ end subroutine allocate_quantities
  implicit none
  deallocate(aEk)
  deallocate(anbis)
- deallocate(anpLs)
+ deallocate(anpLs, anpLd, anpLx, anpLy)
  deallocate(aspolaron)
  deallocate(abpolaron)
  deallocate(aspolaron_ij)
  deallocate(achi_sc)
  deallocate(achi_ch)
  deallocate(bnbis_avg)
- deallocate(bnpLs_avg)
+ deallocate(bnpLs_avg, bnpLd_avg, bnpLx_avg, bnpLy_avg)
  deallocate(bEk)
  deallocate(bnbis)
- deallocate(bnpLs)
+ deallocate(bnpLs, bnpLd, bnpLx, bnpLy)
  deallocate(bsp_site_avg)
  deallocate(bbp_site_avg)
  deallocate(bnbi1)
@@ -183,8 +208,14 @@ end subroutine allocate_quantities
  anbis = 0.0d0
  antot = 0.0d0
  anpLs = 0.0d0
+ anpLd = 0.0d0
+ anpLx = 0.0d0
+ anpLy = 0.0d0
  anbis_avg = 0.0d0
  anpLs_avg = 0.0d0
+ anpLd_avg = 0.0d0
+ anpLx_avg = 0.0d0
+ anpLy_avg = 0.0d0
  asp_site_avg = 0.d0
  abp_site_avg = 0.d0
  aspolaron = 0.0d0
@@ -218,9 +249,15 @@ end subroutine allocate_quantities
  bnox(bin) = anox/dfloat(cnt)
  bnoy(bin) = anoy/dfloat(cnt)
  bnpLs_avg(bin) = anpLs_avg/dfloat(cnt)
+ bnpLd_avg(bin) = anpLd_avg/dfloat(cnt)
+ bnpLx_avg(bin) = anpLx_avg/dfloat(cnt)
+ bnpLy_avg(bin) = anpLy_avg/dfloat(cnt)
  bEk(:,bin) = aEk/dfloat(cnt)
  bnbis(:,bin) = anbis/dfloat(cnt)
  bnpLs(:,bin) = anpLs/dfloat(cnt)
+ bnpLd(:,bin) = anpLd/dfloat(cnt)
+ bnpLx(:,bin) = anpLx/dfloat(cnt)
+ bnpLy(:,bin) = anpLy/dfloat(cnt)
  bsp_site_avg(bin) = asp_site_avg/dfloat(cnt)
  bbp_site_avg(bin) = abp_site_avg/dfloat(cnt)
 
@@ -260,8 +297,10 @@ end subroutine allocate_quantities
  integer lwork
  double precision, dimension(0:N-1,0:N-1) :: U
  double precision, allocatable, dimension(:) :: work
- double precision Xi_Ls, Xj_Ls
- double precision a_inn, a_inn2, a_jnn, a_jnn2
+ double precision Xi_Ls, Xi_Ld, Xi_Lx, Xi_Ly, Xj_Ls
+ double precision a_innLs, a_innLd, a_innLx, a_innLy 
+ double precision a_innLs2, a_innLd2, a_innLx2, a_innLy2 
+ double precision a_jnn, a_jnn2
  double precision a_innp, a_innp2, a_jnnp, a_jnnp2
  double precision s_inn, s_inn2, s_innp, s_innp2
  double precision s_jnn, s_jnn2, s_jnnp, s_jnnp2 
@@ -274,6 +313,9 @@ end subroutine allocate_quantities
  ns_mc = 0.0d0
  npx_mc = 0.0d0
  nLs_mc = 0.0d0
+ nLd_mc = 0.0d0 
+ nLx_mc = 0.0d0
+ nLy_mc = 0.0d0
  Sp_mc = 0.0d0
  Bp_mc = 0.0d0
  Sp1_mc = 0.0d0
@@ -307,7 +349,10 @@ end subroutine allocate_quantities
    iyp = return_index_for_coordinates(ix,iy,2) 
    ixm = return_index_for_coordinates(ix-1,iy,1)
    iym = return_index_for_coordinates(ix,iy-1,2)
-   Xi_Ls = -0.5d0*(X(ixp) - X(ixm) + X(iyp) - X(iym))
+   Xi_Ls = 0.5d0*(X(ixm) - X(ixp) + X(iym) - X(iyp))
+   Xi_Ld = 0.5d0*(X(ixm) - X(ixp) - X(iym) + X(iyp))
+   Xi_Lx = (X(ixm) + X(ixp))/sqrt(2.0)
+   Xi_Ly = (X(iym) + X(iyp))/sqrt(2.0)
 
    !sum over eigenstates
    do nn = 0,N-1  
@@ -322,19 +367,34 @@ end subroutine allocate_quantities
      anoy  = anoy  + tmp3
      antot = antot + tmp1+tmp2+tmp3
 
-     a_inn = 0.5d0*(U(ixp,nn) - U(ixm,nn) + U(iyp,nn) - U(iym,nn))
+     a_innLs = 0.5d0*(U(ixp,nn) - U(ixm,nn) + U(iyp,nn) - U(iym,nn))
+     a_innLd = 0.5d0*(U(ixp,nn) - U(ixm,nn) - U(iyp,nn) + U(iym,nn))
+     a_innLx = (U(ixp,nn) + U(ixm,nn))/sqrt(2.0)
+     a_innLy = (U(iyp,nn) + U(iym,nn))/sqrt(2.0)
      s_inn = U(i,nn)
-     a_inn2 = a_inn*a_inn
+     a_innLs2 = a_innLs*a_innLs
+     a_innLd2 = a_innLd*a_innLd
+     a_innLx2 = a_innLx*a_innLx
+     a_innLy2 = a_innLy*a_innLy
      s_inn2 = s_inn*s_inn
 
-     anpLs(i)  = anpLs(i) + fac*a_inn2*Nbi
-     anpLs_avg = anpLs_avg + fac*a_inn2
+     anpLs(i)  = anpLs(i) + fac*a_innLs2*Nbi
+     anpLd(i)  = anpLd(i) + fac*a_innLd2*Nbi
+     anpLx(i)  = anpLx(i) + fac*a_innLx2*Nbi
+     anpLy(i)  = anpLy(i) + fac*a_innLy2*Nbi
+     anpLs_avg = anpLs_avg + fac*a_innLs2
+     anpLd_avg = anpLd_avg + fac*a_innLd2
+     anpLx_avg = anpLx_avg + fac*a_innLx2
+     anpLy_avg = anpLy_avg + fac*a_innLy2
 
      !record quantities for each MC measurement
      if (if_print_MC==1) then
        ns_mc(i) = ns_mc(i) + tmp1*Nbi
        npx_mc(i) = npx_mc(i) + tmp2*Nbi
-       nLs_mc(i) = nLs_mc(i) + fac*a_inn2*Nbi
+       nLs_mc(i) = nLs_mc(i) + fac*a_innLs2*Nbi
+       nLd_mc(i) = nLd_mc(i) + fac*a_innLd2*Nbi
+       nLx_mc(i) = nLx_mc(i) + fac*a_innLx2*Nbi
+       nLy_mc(i) = nLy_mc(i) + fac*a_innLy2*Nbi
      endif
 
      !Also compute orbital occupancy for two sublattices
@@ -343,16 +403,16 @@ end subroutine allocate_quantities
        anbi1 = anbi1 + tmp1/0.5
        anpx1 = anpx1 + tmp2/0.5
        anpy1 = anpy1 + tmp3/0.5
-       anpLs1 = anpLs1 + fac*a_inn2/0.5
+       anpLs1 = anpLs1 + fac*a_innLs2/0.5
      else
        anbi2 = anbi2 + tmp1/0.5
        anpx2 = anpx2 + tmp2/0.5
        anpy2 = anpy2 + tmp3/0.5
-       anpLs2 = anpLs2 + fac*a_inn2/0.5
+       anpLs2 = anpLs2 + fac*a_innLs2/0.5
      endif
 
      ! aspolaron does not need Nbi because of (i) index
-     tmp1 = 2.0d0*fermi*Xi_Ls*(s_inn2 + a_inn2)
+     tmp1 = 2.0d0*fermi*Xi_Ls*(s_inn2 + a_innLs2)
     ! aspolaron(i) = aspolaron(i) + Xi_Ls*tmp1
      aspolaron(i) = aspolaron(i) + tmp1
      asp_site_avg = asp_site_avg + tmp1/Nbi
@@ -360,7 +420,7 @@ end subroutine allocate_quantities
      !record quantities for each MC measurement
      if (if_print_MC==1) then
        Sp_mc(i)  = Sp_mc(i) + tmp1
-       Sp1_mc(i) = Sp1_mc(i) + 2.0d0*fermi*a_inn2
+       Sp1_mc(i) = Sp1_mc(i) + 2.0d0*fermi*a_innLs2
      endif
 
      !Also compute single polaron density for two sublattices
@@ -385,14 +445,14 @@ end subroutine allocate_quantities
        s_innp2 = s_innp*s_innp
        
        tmp1 = fermi*fermi1* Xi_Ls*   &
-              (s_inn2 + a_inn2)*(s_innp2 + a_innp2)
+              (s_inn2 + a_innLs2)*(s_innp2 + a_innp2)
        abpolaron(i) = abpolaron(i) + tmp1
        abp_site_avg = abp_site_avg + tmp1/Nbi
 
        !record quantities for each MC measurement
        if (if_print_MC==1) then
          Bp_mc(i) = Bp_mc(i) + tmp1
-         Bp1_mc(i) = Bp1_mc(i) + fermi*fermi1* a_inn2*a_innp2
+         Bp1_mc(i) = Bp1_mc(i) + fermi*fermi1* a_innLs2*a_innp2
        endif
 
        !Also compute bipolaron density for two sublattices
@@ -429,10 +489,10 @@ end subroutine allocate_quantities
                                     - s_inn*s_jnn*s_innp*s_jnnp  &
                                     + s_inn2*a_jnn2              &
                                     - s_inn*a_jnn*s_innp*a_jnnp  &
-                                    + a_inn2*s_jnn2              &
-                                    - a_inn*s_jnn*a_innp*s_jnnp  &
-                                    + a_inn2*a_jnnp2             &
-                                    - a_inn*a_jnn*a_innp*a_jnnp )
+                                    + a_innLs2*s_jnn2              &
+                                    - a_innLs*s_jnn*a_innp*s_jnnp  &
+                                    + a_innLs2*a_jnnp2             &
+                                    - a_innLs*a_jnn*a_innp*a_jnnp )
 
            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
            !!      s-wave susceptibilities     !!                                                 
@@ -470,12 +530,15 @@ end subroutine allocate_quantities
       write(unit=14,fmt=530)  ns_mc(i)
       write(unit=15,fmt=530)  npx_mc(i)
       write(unit=16,fmt=530)  nLs_mc(i)
-      write(unit=17,fmt=530)  Sp_mc(i)/Xi_Ls
-      write(unit=18,fmt=530)  Bp_mc(i)/Xi_Ls
-      write(unit=19,fmt=530)  Sp1_mc(i)
-      write(unit=20,fmt=530)  Bp1_mc(i)
-      write(unit=21,fmt=530)  Sp_mc(i)
-      write(unit=22,fmt=530)  Bp_mc(i)
+      write(unit=17,fmt=530)  nLd_mc(i)
+      write(unit=18,fmt=530)  nLx_mc(i)
+      write(unit=19,fmt=530)  nLy_mc(i)
+      write(unit=20,fmt=530)  Sp_mc(i)/Xi_Ls
+      write(unit=21,fmt=530)  Bp_mc(i)/Xi_Ls
+      write(unit=22,fmt=530)  Sp1_mc(i)
+      write(unit=23,fmt=530)  Bp1_mc(i)
+      write(unit=24,fmt=530)  Sp_mc(i)
+      write(unit=25,fmt=530)  Bp_mc(i)
     endif
 
    enddo

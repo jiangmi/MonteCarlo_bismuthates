@@ -73,12 +73,15 @@ contains
    open(unit=14,file='dirval'//'/MC_ns_'//'fnameval'//'.txt',status="replace")
    open(unit=15,file='dirval'//'/MC_npx_'//'fnameval'//'.txt',status="replace")
    open(unit=16,file='dirval'//'/MC_nLs_'//'fnameval'//'.txt',status="replace")
-   open(unit=17,file='dirval'//'/MC_Sp_XLs_'//'fnameval'//'.txt',status="replace")
-   open(unit=18,file='dirval'//'/MC_Bp_XLs_'//'fnameval'//'.txt',status="replace")
-   open(unit=19,file='dirval'//'/MC_Sp_Ls_'//'fnameval'//'.txt',status="replace")
-   open(unit=20,file='dirval'//'/MC_Bp_Ls_'//'fnameval'//'.txt',status="replace")
-   open(unit=21,file='dirval'//'/MC_Sp_'//'fnameval'//'.txt',status="replace")
-   open(unit=22,file='dirval'//'/MC_Bp_'//'fnameval'//'.txt',status="replace")
+   open(unit=17,file='dirval'//'/MC_nLd_'//'fnameval'//'.txt',status="replace")
+   open(unit=18,file='dirval'//'/MC_nLx_'//'fnameval'//'.txt',status="replace")
+   open(unit=19,file='dirval'//'/MC_nLy_'//'fnameval'//'.txt',status="replace")
+   open(unit=20,file='dirval'//'/MC_Sp_XLs_'//'fnameval'//'.txt',status="replace")
+   open(unit=21,file='dirval'//'/MC_Bp_XLs_'//'fnameval'//'.txt',status="replace")
+   open(unit=22,file='dirval'//'/MC_Sp_Ls_'//'fnameval'//'.txt',status="replace")
+   open(unit=23,file='dirval'//'/MC_Bp_Ls_'//'fnameval'//'.txt',status="replace")
+   open(unit=24,file='dirval'//'/MC_Sp_'//'fnameval'//'.txt',status="replace")
+   open(unit=25,file='dirval'//'/MC_Bp_'//'fnameval'//'.txt',status="replace")
  endif
 
  return

@@ -46,6 +46,12 @@ call get_err(bnoy,mean,std)
 write(unit=6,fmt=100) '  O(y) filling = ', mean, std
 call get_err(bnpLs_avg,mean,std)
 write(unit=6,fmt=100) '  Ls Oxygen holes = ', mean, std
+call get_err(bnpLd_avg,mean,std)
+write(unit=6,fmt=100) '  Ld Oxygen holes = ', mean, std
+call get_err(bnpLx_avg,mean,std)
+write(unit=6,fmt=100) '  Lx Oxygen holes = ', mean, std
+call get_err(bnpLy_avg,mean,std)
+write(unit=6,fmt=100) '  Ly Oxygen holes = ', mean, std
 call get_err(bsp_site_avg,spmean,spstd)
 write(unit=6,fmt=100) '  Lattice-averaged single polaron = ', spmean, spstd
 
@@ -89,6 +95,18 @@ enddo
 do ii = 0,Nbi-1
   call get_err(bnpLs(ii,:),mean,std)    
   write(unit=6,fmt=200) 'cell', ii, '  <n_p_Ls> = ', mean, std        
+enddo
+do ii = 0,Nbi-1
+  call get_err(bnpLd(ii,:),mean,std)
+  write(unit=6,fmt=200) 'cell', ii, '  <n_p_Ld> = ', mean, std
+enddo
+do ii = 0,Nbi-1
+  call get_err(bnpLx(ii,:),mean,std)
+  write(unit=6,fmt=200) 'cell', ii, '  <n_p_Lx> = ', mean, std
+enddo
+do ii = 0,Nbi-1
+  call get_err(bnpLy(ii,:),mean,std)
+  write(unit=6,fmt=200) 'cell', ii, '  <n_p_Ly> = ', mean, std
 enddo
 
 do ii = 0,Nbi-1
