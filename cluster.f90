@@ -7,6 +7,7 @@ module cluster
  integer, dimension(:,:), allocatable :: dclass  
  integer, dimension(:),   allocatable :: dclass_F
  real*8,  dimension(:,:,:), allocatable :: expqr
+ real*8,  dimension(:,:),   allocatable :: phase
 contains
  
  !=============================================================================
@@ -64,6 +65,7 @@ contains
  allocate(dclass(0:Nbi-1,0:Nbi-1))
  allocate(dclass_F(0:nclass-1))
  allocate(expqr(0:nclass-1, 0:Nbi-1,0:Nbi-1))
+ allocate(phase(0:Nbi-1,0:Nbi-1))
  expqr = 0.d0
  dclass = 0
  dclass_F = 0
@@ -104,6 +106,13 @@ contains
      qy = dy*2.0d0*pi/Ny
      expqr(k,i,j) = cos(qx*(ix+jx) + qy*(iy+jy))
    !  print*, 'q=',qx,qy,'r=',ix+jx,iy+jy,'expqr=',expqr(k,i,j)
+
+     ! staggered phase for computing staggered correlation in measurement.f90
+     if (mod(dx+dy,2)==0) then
+       phase(i,j) = 1.0
+     else
+       phase(i,j) = -1.0
+     endif
     enddo
    enddo
   enddo

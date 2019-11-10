@@ -21,8 +21,15 @@ module measurements
  double precision, dimension(:), allocatable  :: aspolaron
  double precision, dimension(:), allocatable  :: abpolaron
  double precision, dimension(:), allocatable  :: aspolaron_ij
+ double precision, dimension(:), allocatable  :: abpolaron_ij
  double precision, dimension(:), allocatable  :: achi_sc
  double precision, dimension(:,:,:), allocatable  :: achi_ch
+
+ !utility arrays
+ double precision, dimension(:), allocatable  :: fermi
+ double precision, dimension(:,:), allocatable  :: ns
+ double precision, dimension(:,:), allocatable  :: nLs
+ double precision, dimension(:,:), allocatable  :: nr
 
  !Below site-dependent quantities along MC updates
  double precision, dimension(:), allocatable  :: ns_mc
@@ -51,6 +58,19 @@ module measurements
  double precision, dimension(:), allocatable  :: bsp_site_avg
  double precision, dimension(:), allocatable  :: bbp_site_avg
 
+ double precision, dimension(:,:), allocatable  :: bEk
+ double precision, dimension(:,:), allocatable  :: bnbis
+ double precision, dimension(:,:), allocatable  :: bnpLs
+ double precision, dimension(:,:), allocatable  :: bnpLd
+ double precision, dimension(:,:), allocatable  :: bnpLx
+ double precision, dimension(:,:), allocatable  :: bnpLy
+ double precision, dimension(:,:), allocatable :: bspolaron
+ double precision, dimension(:,:), allocatable :: bbpolaron
+ double precision, dimension(:,:), allocatable :: bspolaron_ij
+ double precision, dimension(:,:), allocatable :: bbpolaron_ij
+ double precision, dimension(:,:), allocatable  :: bchi_sc
+ double precision, dimension(:,:,:,:), allocatable  :: bchi_ch
+
  !sublattice dependent quantities
  double precision, dimension(:), allocatable  :: bnbi1
  double precision, dimension(:), allocatable  :: bnbi2
@@ -64,19 +84,6 @@ module measurements
  double precision, dimension(:), allocatable  :: bsp2
  double precision, dimension(:), allocatable  :: bbp1
  double precision, dimension(:), allocatable  :: bbp2
-
- double precision, dimension(:,:), allocatable  :: bEk
- double precision, dimension(:,:), allocatable  :: bnbis
- double precision, dimension(:,:), allocatable  :: bnpLs
- double precision, dimension(:,:), allocatable  :: bnpLd
- double precision, dimension(:,:), allocatable  :: bnpLx
- double precision, dimension(:,:), allocatable  :: bnpLy
- double precision, dimension(:,:), allocatable :: bspolaron
- double precision, dimension(:,:), allocatable :: bbpolaron
- double precision, dimension(:,:), allocatable :: bspolaron_ij
- double precision, dimension(:,:), allocatable  :: bchi_sc
- double precision, dimension(:,:,:,:), allocatable  :: bchi_ch
-
 contains
  !=============================================================================
  subroutine get_err(bins,mean,std)
@@ -93,6 +100,10 @@ contains
  subroutine allocate_quantities()
  use parameters
  implicit none
+ allocate(fermi(0:N-1))
+ allocate(ns(0:Nbi-1, 0:N-1))
+ allocate(nLs(0:Nbi-1, 0:N-1))
+ allocate(nr(0:Nbi-1, 0:N-1))
  allocate(aEk(0:N-1))
  allocate(anbis(0:Nbi-1))
  allocate(anpLs(0:Nbi-1))
@@ -102,6 +113,7 @@ contains
  allocate(aspolaron(0:Nbi-1))
  allocate(abpolaron(0:Nbi-1))
  allocate(aspolaron_ij(0:nclass-1))
+ allocate(abpolaron_ij(0:nclass-1))
  allocate(achi_sc(0:Norb-1))
  allocate(achi_ch(0:nclass-1, 0:Norb-1, 0:Norb-1))
  allocate(benergy(1:nbin))
@@ -148,51 +160,33 @@ contains
  allocate(bspolaron(0:Nbi-1, nbin))
  allocate(bbpolaron(0:Nbi-1, nbin))
  allocate(bspolaron_ij(0:nclass-1, nbin))
+ allocate(bbpolaron_ij(0:nclass-1, nbin))
  allocate(bchi_sc(0:Norb-1, nbin))
  allocate(bchi_ch(0:nclass-1, 0:Norb-1, 0:Norb-1, nbin))
 end subroutine allocate_quantities
  !=============================================================================
  subroutine deallocate_quantities()
  implicit none
- deallocate(aEk)
- deallocate(anbis)
- deallocate(anpLs, anpLd, anpLx, anpLy)
- deallocate(aspolaron)
- deallocate(abpolaron)
- deallocate(aspolaron_ij)
- deallocate(achi_sc)
- deallocate(achi_ch)
- deallocate(bnbis_avg)
- deallocate(bnpLs_avg, bnpLd_avg, bnpLx_avg, bnpLy_avg)
- deallocate(bEk)
- deallocate(bnbis)
- deallocate(bnpLs, bnpLd, bnpLx, bnpLy)
- deallocate(bsp_site_avg)
- deallocate(bbp_site_avg)
- deallocate(bnbi1)
- deallocate(bnbi2)
- deallocate(bnpx1)
- deallocate(bnpx2)
- deallocate(bnpy1)
- deallocate(bnpy2)
- deallocate(bnpLs1)
- deallocate(bnpLs2)
- deallocate(bsp1)
- deallocate(bsp2)
- deallocate(bbp1)
- deallocate(bbp2)
- deallocate(ns_mc)
- deallocate(npx_mc)
- deallocate(nLs_mc)
- deallocate(Sp_mc)
- deallocate(Bp_mc)
- deallocate(Sp1_mc)
- deallocate(Bp1_mc)
- deallocate(bspolaron)
- deallocate(bbpolaron)
- deallocate(bspolaron_ij)
- deallocate(bchi_sc)
- deallocate(bchi_ch)
+ deallocate(fermi)
+ deallocate(ns, nLs, nr)
+ deallocate(aEk, bEk)
+ deallocate(anbis, anpLs, anpLd, anpLx, anpLy)
+ deallocate(aspolaron, abpolaron)
+ deallocate(aspolaron_ij, abpolaron_ij)
+ deallocate(achi_sc, achi_ch)
+ deallocate(bnbis_avg, bnpLs_avg, bnpLd_avg, bnpLx_avg, bnpLy_avg)
+ deallocate(bnbis, bnpLs, bnpLd, bnpLx, bnpLy)
+ deallocate(bsp_site_avg, bbp_site_avg)
+ deallocate(bnbi1, bnbi2)
+ deallocate(bnpx1, bnpx2)
+ deallocate(bnpy1, bnpy2)
+ deallocate(bnpLs1, bnpLs2)
+ deallocate(bsp1, bsp2)
+ deallocate(bbp1, bbp2)
+ deallocate(ns_mc, npx_mc, nLs_mc, Sp_mc, Bp_mc, Sp1_mc, Bp1_mc)
+ deallocate(bspolaron, bbpolaron)
+ deallocate(bspolaron_ij, bbpolaron_ij)
+ deallocate(bchi_sc, bchi_ch)
  end subroutine deallocate_quantities
  !=============================================================================
  subroutine zero_accumulators()
@@ -233,6 +227,7 @@ end subroutine allocate_quantities
  abp1 = 0.0d0
  abp2 = 0.0d0
  aspolaron_ij = 0.0d0
+ abpolaron_ij = 0.0d0
  achi_sc = 0.0d0
  achi_ch = 0.0d0
  end subroutine zero_accumulators
@@ -277,6 +272,7 @@ end subroutine allocate_quantities
  bspolaron(:,bin) = aspolaron/dfloat(cnt)
  bbpolaron(:,bin) = abpolaron/dfloat(cnt)
  bspolaron_ij(:,bin) = aspolaron_ij/dfloat(cnt)
+ bbpolaron_ij(:,bin) = abpolaron_ij/dfloat(cnt)
  bchi_sc(:,bin) = achi_sc/dfloat(cnt)
  bchi_ch(:,:,:,bin) = achi_ch/dfloat(cnt)
  return
@@ -287,10 +283,10 @@ end subroutine allocate_quantities
  !============================================================================
  subroutine do_measurements(X)
  use parameters
- use cluster, only: return_index_for_coordinates, dclass, dclass_F, expqr
+ use cluster, only: return_index_for_coordinates, dclass, dclass_F, expqr, phase
  use monte_carlo, only: compute_total_E, get_H
  implicit none
- integer ix, iy, jx, jy, tau, nn, nnp, mm, nnn
+ integer ix, iy, jx, jy, tau, n1, n2, n3, n4
  integer ixp, iyp, ixm, iym
  integer jxp, jyp, jxm, jym
  integer i, j, k, info, i1, i2, j1, j2
@@ -298,14 +294,10 @@ end subroutine allocate_quantities
  double precision, dimension(0:N-1,0:N-1) :: U
  double precision, allocatable, dimension(:) :: work
  double precision Xi_Ls, Xi_Ld, Xi_Lx, Xi_Ly, Xj_Ls
- double precision a_innLs, a_innLd, a_innLx, a_innLy 
- double precision a_innLs2, a_innLd2, a_innLx2, a_innLy2 
- double precision a_jnn, a_jnn2
- double precision a_innp, a_innp2, a_jnnp, a_jnnp2
- double precision s_inn, s_inn2, s_innp, s_innp2
- double precision s_jnn, s_jnn2, s_jnnp, s_jnnp2 
+ double precision a_innLd, a_innLx, a_innLy
+ double precision a_innLd2, a_innLx2, a_innLy2
  double precision tmp1, tmp2, tmp3
- double precision energy, fermi, fac, fermi1, fac1, factor
+ double precision energy, fac, fac1, factor
  double precision, dimension(0:N-1) :: X
  double precision, dimension(0:N-1) :: Ek
 
@@ -320,6 +312,11 @@ end subroutine allocate_quantities
  Bp_mc = 0.0d0
  Sp1_mc = 0.0d0
  Bp1_mc = 0.0d0
+
+ fermi = 0.0d0
+ ns = 0.0d0
+ nLs = 0.d0
+ nr = 0.d0
 
  cnt = cnt + 1
  call compute_total_E(energy,X)
@@ -341,7 +338,34 @@ end subroutine allocate_quantities
 
  aEk = aEk + Ek
 
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!  Obtain useful arrays  !!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ do n1 = 0,N-1
+   fermi(n1) = 1.0d0/(exp(beta*(Ek(n1)-mu))+1.0d0)
+ enddo
+ 
  !loop over Bi sites
+ do ix = 0,Nx-1
+  do iy = 0,Ny-1
+   i = return_index_for_coordinates(ix,iy,0)
+   ixp = return_index_for_coordinates(ix,iy,1)
+   iyp = return_index_for_coordinates(ix,iy,2)
+   ixm = return_index_for_coordinates(ix-1,iy,1)
+   iym = return_index_for_coordinates(ix,iy-1,2)
+
+   !sum over eigenstates
+   do n1 = 0,N-1
+     ns(i,n1)  = U(i,n1)*U(i,n1)
+     nLs(i,n1) = (0.5d0*(U(ixp,n1) - U(ixm,n1) + U(iyp,n1) - U(iym,n1)))**2.0
+     nr(i,n1)  = ns(i,n1) + nLs(i,n1)
+   enddo
+  enddo
+ enddo
+
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ ! start computing quantities
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  do ix = 0,Nx-1
   do iy = 0,Ny-1
    i = return_index_for_coordinates(ix,iy,0)
@@ -349,40 +373,36 @@ end subroutine allocate_quantities
    iyp = return_index_for_coordinates(ix,iy,2) 
    ixm = return_index_for_coordinates(ix-1,iy,1)
    iym = return_index_for_coordinates(ix,iy-1,2)
+
    Xi_Ls = 0.5d0*(X(ixm) - X(ixp) + X(iym) - X(iyp))
    Xi_Ld = 0.5d0*(X(ixm) - X(ixp) - X(iym) + X(iyp))
    Xi_Lx = (X(ixm) + X(ixp))/sqrt(2.0)
    Xi_Ly = (X(iym) + X(iyp))/sqrt(2.0)
 
    !sum over eigenstates
-   do nn = 0,N-1  
-     fermi = 1.0d0/(exp(beta*(Ek(nn)-mu))+1.0d0)
-     fac = 2.0d0*fermi/Nbi
-     tmp1 = fac*U(i,nn)*U(i,nn)
-     tmp2 = fac*U(ixp,nn)*U(ixp,nn)
-     tmp3 = fac*U(iyp,nn)*U(iyp,nn)
+   do n1 = 0,N-1
+     fac = 2.0d0*fermi(n1)/Nbi
+     tmp1 = fac*ns(i,n1)
+     tmp2 = fac*U(ixp,n1)*U(ixp,n1)
+     tmp3 = fac*U(iyp,n1)*U(iyp,n1)
      anbis(i) = anbis(i) + tmp1*Nbi
      anbis_avg = anbis_avg + tmp1
      anox  = anox  + tmp2
      anoy  = anoy  + tmp3
      antot = antot + tmp1+tmp2+tmp3
 
-     a_innLs = 0.5d0*(U(ixp,nn) - U(ixm,nn) + U(iyp,nn) - U(iym,nn))
-     a_innLd = 0.5d0*(U(ixp,nn) - U(ixm,nn) - U(iyp,nn) + U(iym,nn))
-     a_innLx = (U(ixp,nn) + U(ixm,nn))/sqrt(2.0)
-     a_innLy = (U(iyp,nn) + U(iym,nn))/sqrt(2.0)
-     s_inn = U(i,nn)
-     a_innLs2 = a_innLs*a_innLs
+     a_innLd = 0.5d0*(U(ixp,n1) - U(ixm,n1) - U(iyp,n1) + U(iym,n1))
+     a_innLx = (U(ixp,n1) + U(ixm,n1))/sqrt(2.0)
+     a_innLy = (U(iyp,n1) + U(iym,n1))/sqrt(2.0)
      a_innLd2 = a_innLd*a_innLd
      a_innLx2 = a_innLx*a_innLx
      a_innLy2 = a_innLy*a_innLy
-     s_inn2 = s_inn*s_inn
 
-     anpLs(i)  = anpLs(i) + fac*a_innLs2*Nbi
+     anpLs(i)  = anpLs(i) + fac*nLs(i,n1)*Nbi
      anpLd(i)  = anpLd(i) + fac*a_innLd2*Nbi
      anpLx(i)  = anpLx(i) + fac*a_innLx2*Nbi
      anpLy(i)  = anpLy(i) + fac*a_innLy2*Nbi
-     anpLs_avg = anpLs_avg + fac*a_innLs2
+     anpLs_avg = anpLs_avg + fac*nLs(i,n1)
      anpLd_avg = anpLd_avg + fac*a_innLd2
      anpLx_avg = anpLx_avg + fac*a_innLx2
      anpLy_avg = anpLy_avg + fac*a_innLy2
@@ -391,7 +411,7 @@ end subroutine allocate_quantities
      if (if_print_MC==1) then
        ns_mc(i) = ns_mc(i) + tmp1*Nbi
        npx_mc(i) = npx_mc(i) + tmp2*Nbi
-       nLs_mc(i) = nLs_mc(i) + fac*a_innLs2*Nbi
+       nLs_mc(i) = nLs_mc(i) + fac*nLs(i,n1)*Nbi
        nLd_mc(i) = nLd_mc(i) + fac*a_innLd2*Nbi
        nLx_mc(i) = nLx_mc(i) + fac*a_innLx2*Nbi
        nLy_mc(i) = nLy_mc(i) + fac*a_innLy2*Nbi
@@ -403,24 +423,26 @@ end subroutine allocate_quantities
        anbi1 = anbi1 + tmp1/0.5
        anpx1 = anpx1 + tmp2/0.5
        anpy1 = anpy1 + tmp3/0.5
-       anpLs1 = anpLs1 + fac*a_innLs2/0.5
+       anpLs1 = anpLs1 + fac*nLs(i,n1)/0.5
      else
        anbi2 = anbi2 + tmp1/0.5
        anpx2 = anpx2 + tmp2/0.5
        anpy2 = anpy2 + tmp3/0.5
-       anpLs2 = anpLs2 + fac*a_innLs2/0.5
+       anpLs2 = anpLs2 + fac*nLs(i,n1)/0.5
      endif
 
+     !!!!!!!!!!!!!!!!!!!!!!!!!!
+     !!   single polaron     !!
+     !!!!!!!!!!!!!!!!!!!!!!!!!!
      ! aspolaron does not need Nbi because of (i) index
-     tmp1 = 2.0d0*fermi*Xi_Ls*(s_inn2 + a_innLs2)
-    ! aspolaron(i) = aspolaron(i) + Xi_Ls*tmp1
+     tmp1 = 2.0d0*fermi(n1)*Xi_Ls*nr(i,n1)
      aspolaron(i) = aspolaron(i) + tmp1
      asp_site_avg = asp_site_avg + tmp1/Nbi
 
      !record quantities for each MC measurement
      if (if_print_MC==1) then
        Sp_mc(i)  = Sp_mc(i) + tmp1
-       Sp1_mc(i) = Sp1_mc(i) + 2.0d0*fermi*a_innLs2
+       Sp1_mc(i) = Sp1_mc(i) + 2.0d0*fermi(n1)*nLs(i,n1)
      endif
 
      !Also compute single polaron density for two sublattices
@@ -431,28 +453,20 @@ end subroutine allocate_quantities
        asp2 = asp2 + tmp1/(Nbi/2.0)
      endif
 
-     ! second sum over eigenstates for bipolaron etc.
-     do nnp = 0,N-1     
+     ! second sum over eigenstates for bipolaron (Bp) and Sp correlation
+     do n2 = 0,N-1
        !!!!!!!!!!!!!!!!!!!!!!!!!!
        !!       bipolaron      !!
        !!!!!!!!!!!!!!!!!!!!!!!!!!
-       fermi1 = 1.0d0/(exp(beta*(Ek(nnp)-mu))+1.0d0)
-       fac1 = 2.0d0*fermi1/Nbi
-
-       a_innp = 0.5d0*(U(ixp,nnp) - U(ixm,nnp) + U(iyp,nnp) - U(iym,nnp))
-       s_innp = U(i,nnp)
-       a_innp2 = a_innp*a_innp
-       s_innp2 = s_innp*s_innp
-       
-       tmp1 = fermi*fermi1* Xi_Ls*   &
-              (s_inn2 + a_innLs2)*(s_innp2 + a_innp2)
+       fac1 = 2.0d0*fermi(n2)/Nbi
+       tmp1 = fermi(n1)*fermi(n2)* Xi_Ls*nr(i,n1)*nr(i,n2)
        abpolaron(i) = abpolaron(i) + tmp1
        abp_site_avg = abp_site_avg + tmp1/Nbi
 
        !record quantities for each MC measurement
        if (if_print_MC==1) then
          Bp_mc(i) = Bp_mc(i) + tmp1
-         Bp1_mc(i) = Bp1_mc(i) + fermi*fermi1* a_innLs2*a_innp2
+         Bp1_mc(i) = Bp1_mc(i) + fermi(n1)*fermi(n2)* nLs(i,n1)*nLs(i,n2)
        endif
 
        !Also compute bipolaron density for two sublattices
@@ -474,25 +488,26 @@ end subroutine allocate_quantities
            k = dclass(i,j)
           ! print*, 'meas ', k,i,j
 
-           !!!!!!!!!!!!!!!!!!!!!!!!
-           !!       <L_i*L_j>    !!
-           !!!!!!!!!!!!!!!!!!!!!!!!
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+           !!  single polaron staggered correlation  !!
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
            Xj_Ls = -0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
-           a_jnnp = 0.5d0*(U(jxp,nnp) - U(jxm,nnp) + U(jyp,nnp) - U(jym,nnp))
-           a_jnn  = 0.5d0*(U(jxp,nn) - U(jxm,nn) + U(jyp,nn) - U(jym,nn))
-           a_jnn2  = a_jnn *a_jnn
-           a_jnnp2 = a_jnnp*a_jnnp
+           tmp1 = fermi(n1)*fermi(n2)*Xi_Ls*Xj_Ls*phase(i,j)/dclass_F(k)
+           factor = 4.0*tmp1
+           aspolaron_ij(k) = aspolaron_ij(k) + factor*nr(i,n1)*nr(j,n2)
 
-           factor = fac*fac1*Xi_Ls*Xj_Ls/dclass_F(k)
-           aspolaron_ij(k) = aspolaron_ij(k) + factor*(          &
-                                      s_inn2*s_jnnp2             &
-                                    - s_inn*s_jnn*s_innp*s_jnnp  &
-                                    + s_inn2*a_jnn2              &
-                                    - s_inn*a_jnn*s_innp*a_jnnp  &
-                                    + a_innLs2*s_jnn2              &
-                                    - a_innLs*s_jnn*a_innp*s_jnnp  &
-                                    + a_innLs2*a_jnnp2             &
-                                    - a_innLs*a_jnn*a_innp*a_jnnp )
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+           !!  bipolaron staggered correlation  !!
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+           ! need additional two sum over eigenstates for bipolaron etc.
+           ! X_iLs*X_jLs * n_iup*n_idn*n_jup*n_jdn
+           do n3 = 0,N-1
+             do n4 = 0,N-1
+               factor = tmp1*fermi(n3)*fermi(n4)
+               abpolaron_ij(k) = abpolaron_ij(k) + factor*  &
+                                    nr(i,n1)*nr(i,n2)*nr(j,n3)*nr(j,n4)
+             enddo
+           enddo
 
            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
            !!      s-wave susceptibilities     !!                                                 
@@ -500,8 +515,8 @@ end subroutine allocate_quantities
            do o1 = 0,Norb-1
              i1 = return_index_for_coordinates(ix,iy,o1)
              i2 = return_index_for_coordinates(jx,jy,o1)
-             achi_sc(o1) = achi_sc(o1) + fermi*fermi1/Nbi   &
-                 *U(i1,nn)*U(i1,nn)*U(i2,nnp)*U(i2,nnp)
+             achi_sc(o1) = achi_sc(o1) + fermi(n1)*fermi(n2)/Nbi   &
+                 *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
            enddo
 
            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
@@ -513,19 +528,21 @@ end subroutine allocate_quantities
                j2 = return_index_for_coordinates(jx,jy,0)
                i1 = return_index_for_coordinates(ix,iy,o1)
                i2 = return_index_for_coordinates(jx,jy,o2)
-               achi_ch(k,o1,o2) = achi_ch(k,o1,o2) + 4.0d0*fermi*fermi1/Nbi   &
-                   *expqr(k,j1,j2)*U(i1,nn)*U(i1,nn)*U(i2,nnp)*U(i2,nnp)
-                  ! *U(i1,nn)*U(i1,nn)*U(i2,nnp)*U(i2,nnp)
+               achi_ch(k,o1,o2) = achi_ch(k,o1,o2) + 4.0d0*fermi(n1)*fermi(n2)/Nbi   &
+                   *expqr(k,j1,j2)*U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
+                  ! *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
              enddo
            enddo
          enddo
        enddo  !end loop jx, jy
-     enddo !end loop nnp
-    enddo  !end loop nn
+     enddo !end loop n2
+    enddo  !end loop n1
     
     !Print quantities for each MC measurement
     if (if_print_MC==1) then
       530 format(f13.5)
+      540 format(f13.5,f13.5,f13.5,f13.5)
+      write(unit=26,fmt=540)  X(ixp), X(ixm), X(iyp), X(iym)
       write(unit=13,fmt=530)  Xi_Ls
       write(unit=14,fmt=530)  ns_mc(i)
       write(unit=15,fmt=530)  npx_mc(i)

@@ -65,10 +65,15 @@ contains
  open(unit=12,file='dirval'//'/data_sublat_'//'fnameval'//'.txt',status="replace")
  write(unit=12,fmt=520) 'beta     n_avg      n_Bi1      n_Bi2      n_px1      n_px2     n_py1      n_py2      n_A1g1     n_A1g2      Sp1        Sp2       Bp1       Bp2'
 
+ 550 format(a41)
+ open(unit=7,file='dirval'//'/SpBp_r_'//'fnameval'//'.txt',status="replace")
+ write(unit=7,fmt=550) 'dx    dy     Sp      err      Bp      err'
+
  open(unit=30,file='dirval'//'/Ek_'//'fnameval'//'.txt',status="replace")
 
  ! Print various quantities along the MC updates
  if (if_print_MC==1) then
+   open(unit=26,file='dirval'//'/MC_Xp_'//'fnameval'//'.txt',status="replace")
    open(unit=13,file='dirval'//'/MC_XLs_'//'fnameval'//'.txt',status="replace")
    open(unit=14,file='dirval'//'/MC_ns_'//'fnameval'//'.txt',status="replace")
    open(unit=15,file='dirval'//'/MC_npx_'//'fnameval'//'.txt',status="replace")
