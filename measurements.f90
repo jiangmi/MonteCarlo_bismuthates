@@ -89,7 +89,6 @@ contains
  subroutine get_err(bins,mean,std)
  use parameters, only: nbin
  implicit none
- integer i
  double precision, dimension(1:nbin) :: bins
  double precision mean, std
  mean = sum(bins(:))/dfloat(nbin)
@@ -286,7 +285,7 @@ end subroutine allocate_quantities
  use cluster, only: return_index_for_coordinates, dclass, dclass_F, expqr, phase
  use monte_carlo, only: compute_total_E, get_H
  implicit none
- integer ix, iy, jx, jy, tau, n1, n2, n3, n4
+ integer ix, iy, jx, jy, n1, n2, n3, n4
  integer ixp, iyp, ixm, iym
  integer jxp, jyp, jxm, jym
  integer i, j, k, info, i1, i2, j1, j2
@@ -501,13 +500,30 @@ end subroutine allocate_quantities
            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
            ! need additional two sum over eigenstates for bipolaron etc.
            ! X_iLs*X_jLs * n_iup*n_idn*n_jup*n_jdn
+           tmp2 = 0.0
            do n3 = 0,N-1
              do n4 = 0,N-1
                factor = tmp1*fermi(n3)*fermi(n4)
-               abpolaron_ij(k) = abpolaron_ij(k) + factor*  &
-                                    nr(i,n1)*nr(i,n2)*nr(j,n3)*nr(j,n4)
+               tmp2 = tmp2 + factor* nr(i,n1)*nr(i,n2)*nr(j,n3)*nr(j,n4)
              enddo
            enddo
+
+           abpolaron_ij(k) = abpolaron_ij(k) + tmp2
+
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+           !!  correct Sp staggered correlation by Bp  !!
+           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+           ! need additional two sum over eigenstates for bipolaron etc.
+           ! X_iLs*X_jLs * n_iup*n_jup*n_jdn temporary term
+           tmp3 = 0.0
+           do n3 = 0,N-1
+             factor = 2.0*tmp1*fermi(n3)
+             tmp3 = tmp3 - factor* (nr(i,n1)*nr(j,n2)*nr(j,n3)  &
+                                   +nr(j,n1)*nr(i,n2)*nr(i,n3))
+           enddo
+
+           ! correction
+           aspolaron_ij(k) = aspolaron_ij(k) + 4.0*tmp2 + tmp3
 
            !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
            !!      s-wave susceptibilities     !!                                                 

@@ -33,7 +33,7 @@ contains
  Ny = Nyval
  N = Nx*Ny*Norb
  NBi = Nx*Ny
- nclass = (Nx/2+1)*(Ny/2+1)
+ nclass = (Nx+1)*(Ny+1)
  mu = muval
  es = esval
  ep = epval

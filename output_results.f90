@@ -2,7 +2,7 @@
 100 format(a40,' ',f13.5,' +- ',f13.5)
 110 format(a40,' ',f9.5)
 200 format(a6, i3, a30, ' ',f8.5,' +- ',f8.5)
-300 format(i3, ' ', i3, ' ',f13.5,' ',f13.5, ' ',f13.5,' ',f13.5)
+300 format(i3, ' ', i3, ' ',f13.8,' ',f13.8, ' ',f13.8,' ',f13.8)
 400 format(a6, f4.1, a1, f4.1, a1)
 410 format(a18, f9.5, f9.5)
 420 format(a5, i3, i3, a11, f9.5, f9.5) 
@@ -146,8 +146,8 @@ do k = 0,nclass-1
   if (dclass_F(k)/=0) then
     call get_err(bspolaron_ij(k,:),spmean,spstd)
     call get_err(bbpolaron_ij(k,:),bpmean,bpstd)
-    i = mod(k,(Nx/2+1))
-    j = k/(Nx/2+1)
+    i = mod(k, Nx+1)-Nx/2
+    j = k/(Nx+1)-Ny/2
     write(unit=7,fmt=300) i, j, spmean, spstd, bpmean, bpstd
   endif
 enddo

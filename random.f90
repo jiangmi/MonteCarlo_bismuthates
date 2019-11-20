@@ -4,7 +4,7 @@ module random
 contains
  DOUBLE PRECISION FUNCTION RAN2(idum)
  implicit none
- double precision rtmp, rm
+ double precision rm
  integer ia,ic,iff,ir,iy,j,m,idum
  save
  PARAMETER (M=714025,IA=1366,IC=150889,RM=1.4005112d-6)
