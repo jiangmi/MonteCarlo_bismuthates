@@ -2,17 +2,18 @@
 ! Module parameters defines all global parameters for our problem.
 !==============================================================================
 module parameters
- integer Nx 
- integer Ny 
+ integer Nx, Ncx
+ integer Ny, Ncy 
  integer, parameter :: Norb = 3          !number of orbitals in the basis
  real*8,  parameter :: pi = 3.1415926
- integer N                               !total number of orbitals
+ integer N, Nc                           !total number of orbitals
  integer Nbi                             !total number of Bi orbitals
  integer nclass                          !number of distance class
  integer num_beta_steps
  integer nwarms, ninv, nmeas, nbin, nbeta
  integer if_X_displace                   ! No displacement for checking code
  integer if_print_MC
+ integer travel_cluster                  ! if using travelling cluster sampling
  double precision mu
  double precision tsp                    !O-Bi overlap integral
  double precision tpp                    !O-O overlap integral
@@ -31,7 +32,10 @@ contains
  implicit none
  Nx = Nxval
  Ny = Nyval
- N = Nx*Ny*Norb
+ N  = Nx*Ny*Norb
+ Ncx = Ncxval
+ Ncy = Ncyval
+ Nc  = Ncx*Ncy*Norb
  NBi = Nx*Ny
  nclass = (Nx+1)*(Ny+1)
  mu = muval
@@ -45,6 +49,7 @@ contains
  if_X_displace = 1
  if_print_MC = 1
  dXamp = dXampval
+ travel_cluster = 1
 
  nbeta = nbetaval
  allocate(betas(1:nbeta))

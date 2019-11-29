@@ -280,7 +280,7 @@ end subroutine allocate_quantities
  !============================================================================
  ! do_measurements below
  !============================================================================
- subroutine do_measurements(X)
+ subroutine do_measurements(X, teigen, tmeas)
  use parameters
  use cluster, only: return_index_for_coordinates, dclass, dclass_F, expqr, phase
  use monte_carlo, only: compute_total_E, get_H
@@ -297,6 +297,7 @@ end subroutine allocate_quantities
  double precision a_innLd2, a_innLx2, a_innLy2
  double precision tmp1, tmp2, tmp3
  double precision energy, fac, fac1, factor
+ double precision tm1, tm2, tm3, teigen, tmeas
  double precision, dimension(0:N-1) :: X
  double precision, dimension(0:N-1) :: Ek
 
@@ -317,6 +318,8 @@ end subroutine allocate_quantities
  nLs = 0.d0
  nr = 0.d0
 
+ call cpu_time(tm1)
+
  cnt = cnt + 1
  call compute_total_E(energy,X)
  aenergy = aenergy + energy/N
@@ -336,6 +339,9 @@ end subroutine allocate_quantities
  endif
 
  aEk = aEk + Ek
+
+ call cpu_time(tm2)
+ teigen = tm2-tm1
 
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !!!  Obtain useful arrays  !!!
@@ -577,10 +583,12 @@ end subroutine allocate_quantities
    enddo
  enddo   !end loop ix, iy
 
+ call cpu_time(tm3)
+ tmeas = tm3-tm2
+
  deallocate(work)
 
  return
  end subroutine do_measurements
-
 
 end module measurements

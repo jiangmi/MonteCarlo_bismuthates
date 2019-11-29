@@ -2,14 +2,16 @@
 ! first 0:NBi-1 is bismuth and then px orbital and finally py orbital 
 ! N = Nx*Ny*Norb; NBi = Nx*Ny
 module cluster 
- use parameters, only: N, pi, Nx, Ny, Nbi, nclass
+ use parameters, only: N, Nc, pi, Nx, Ny, Ncx, Ncy, Nbi, nclass
  real*8 qx, qy
  integer, dimension(:,:), allocatable :: dclass  
  integer, dimension(:),   allocatable :: dclass_F
  real*8,  dimension(:,:,:), allocatable :: expqr
  real*8,  dimension(:,:),   allocatable :: phase
- integer,  dimension(:,:),   allocatable :: dx
- integer,  dimension(:,:),   allocatable :: dy
+ integer, dimension(:,:),   allocatable :: dx
+ integer, dimension(:,:),   allocatable :: dy
+ integer, dimension(:,:),   allocatable :: cluster_boundary
+ integer, dimension(:,:),   allocatable :: cluster_sites
 contains
  
  !=============================================================================
@@ -33,6 +35,26 @@ contains
  end function return_index_for_coordinates
 
  !=============================================================================
+ ! similat to return_index_for_coordinates above but replace Nx by Ncx
+ integer function return_index_for_coordinates_cluster(i,j,d)
+ implicit none
+ integer ix, iy, del, i, j, d
+ ix = i
+ iy = j
+ del = d
+ if(Del.ge.3)then
+  print*, 'Invalid basis site index passed to return_index_for_coordinates.'
+  stop
+ endif
+ if(ix.lt.0) ix = ix + Ncx
+ if(ix.ge.Ncx) ix = ix - Ncx
+ if(iy.lt.0) iy = iy + Ncy
+ if(iy.ge.Ncy) iy = iy - Ncy
+ return_index_for_coordinates_cluster = ix + iy*Ncx + del*Ncx*Ncy
+ return
+ end function return_index_for_coordinates_cluster
+
+ !=============================================================================
  subroutine return_coordinates_for_index(idx,ix,iy,del)
  implicit none
  integer itmp, idx, ix, iy, del
@@ -43,6 +65,93 @@ contains
  ix = itmp - iy*Nx
  return
  end subroutine return_coordinates_for_index
+
+ !=============================================================================
+ ! correct index when out of lattice boundary using periodic boundary
+ integer function pos(i,Ns)
+ implicit none
+ integer i, j, Ns
+ j = i
+ if(i.lt.0)  j = i + Ns
+ if(i.ge.Ns) j = i - Ns
+ pos = j
+ return
+ end function pos
+
+ !=============================================================================
+ !sort index array in ascending order
+ subroutine sort(indices)
+ implicit none
+ integer, dimension(1:Nc) :: indices  
+ integer i, k, buf
+ do i= 1,Nc-1
+    k = minloc(indices(i:Nc), dim=1) + i-1
+    buf = indices(i)
+    indices(i) = indices(k)
+    indices(k) = buf
+ enddo
+
+ return
+ end subroutine sort
+
+ !=============================================================================
+ subroutine find_cluster()
+ !find unit cell range of the cluster around all px/py site i despite 
+ !declared cluster_boundary as (0:N-1,:) but all Bi sites are set to be zero
+ !px/py orbital is in the center of the cluster
+ !cluster_boundary(i,4): 4 denotes the cluster located within x:[1,2]; y:[3,4]
+ implicit none
+ integer ix, iy, jx, jy, kx, ky, i, j, cnt, iorb, jorb
+ integer, dimension(1:Nc) :: tmp  
+ allocate(cluster_boundary(0:N-1, 4))
+ allocate(cluster_sites(0:N-1,0:Nc-1))
+
+ cluster_boundary = 0
+ cluster_sites = 0
+
+ do ix = 0,Nx-1
+  do iy = 0,Ny-1
+   do iorb = 1,2
+     i = return_index_for_coordinates(ix,iy,iorb)
+     cluster_boundary(i, 1) = pos(ix-(Ncx/2-1), Nx)
+     cluster_boundary(i, 2) = pos(ix+Ncx/2, Nx)
+     cluster_boundary(i, 3) = pos(iy-(Ncy/2-1), Ny)
+     cluster_boundary(i, 4) = pos(iy+Ncy/2, Ny)
+     !print*, i,'bound:', cluster_boundary(i, 1:4)
+
+     cnt = 0
+     tmp = 0
+
+     !Follow the ordering rule of original lattice (see top):
+     !first 0:NBi-1 is bismuth and then px and finally py
+     do jorb = 0,2
+       do jy = iy-(Ncy/2-1), iy+Ncy/2
+         ky = pos(jy,Ny)
+
+         do jx = ix-(Ncx/2-1), ix+Ncx/2
+           kx = pos(jx,Nx)
+
+           j = return_index_for_coordinates(kx,ky,jorb)
+           tmp(cnt) = j
+           cnt = cnt+1
+         enddo
+       enddo
+     enddo
+     
+     if (cnt/=Nc) then
+       print*, 'Error: # of cluster sites incorrect!'
+     endif
+
+     !print*, 'site',i, 'cluster:', tmp
+     !call sort(tmp)
+     cluster_sites(i,:) = tmp
+     !print*, 'site',i, 'sorted cluster:', cluster_sites(i,:)
+   enddo
+  enddo
+ enddo
+
+ return
+ end subroutine find_cluster
 
  !=============================================================================
  logical function is_bismuth(i)

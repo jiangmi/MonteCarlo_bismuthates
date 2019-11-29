@@ -19,7 +19,8 @@ double precision mean,std,Emean,Estd,Nmean,Nstd, &
                  swave_px_mean, swave_px_std,    &
                  swave_py_mean, swave_py_std
 double precision means(12)  ! store sublat dependent quantities
-double precision t1, t2, Xval, Etot, Xavg
+double precision t1, t2, t3, t4, t5, t6, t7, tsweep, teigenvector,tmeas
+double precision Xval, Etot, Xavg
 double precision, dimension(:),   allocatable :: X
 double precision, dimension(:,:), allocatable :: H0
 
@@ -27,9 +28,12 @@ call init_parameters()     ! classify distance in cluster.f90
 call allocate_quantities() ! set physical quantites
 500 format(a20,i7,a3,i7,a20,f8.5)
 600 format(a30,f8.5,a8,f8.5)
-call get_distance_class()
 
-call cpu_time(t1)
+if (travel_cluster==1) then
+  print*, 'This run uses traveling cluster approximation'
+  call find_cluster()
+endif
+call get_distance_class()
 
 print*, 'Enter a random seed for this run:'
 !read(5,*) iran
@@ -72,6 +76,8 @@ X = 0.0d0
 
 ! Loop over temperature starting from highest T
 do ibeta = 1,nbeta
+ call cpu_time(t1)
+
  beta = betas(ibeta)
  print*, '  '
  print*, '==========================================================='
@@ -89,7 +95,11 @@ do ibeta = 1,nbeta
   endif
   !print*, '------------------------'
   !print*, 'warmup sweep No.',i
-  call single_site_sweep(X,accept,reject)
+  if (travel_cluster==0) then
+    call single_site_sweep(X,accept,reject)
+  else
+    call single_site_sweep_cluster(X,accept,reject)
+  endif
  enddo
 
  print *, 'warmup finished, X='
@@ -100,8 +110,16 @@ do ibeta = 1,nbeta
 
  call compute_total_E(Etot, X)
  print *, 'warmup finished, total E=', Etot
+
+ call cpu_time(t2)
  
  ! measurements begins
+ tsweep = 0.0
+ teigenvector = 0.0
+ tmeas = 0.0
+ t5 = 0.0
+ t6 = 0.0
+
  accept = 0
  reject = 0
  call zero_accumulators()
@@ -118,8 +136,20 @@ do ibeta = 1,nbeta
   endif
   !print*, '------------------------'
   !print*, 'measurement sweep No.',i
-  call single_site_sweep(X,accept,reject)
-  call do_measurements(X)
+
+  call cpu_time(t3)
+  if (travel_cluster==0) then
+    call single_site_sweep(X,accept,reject)
+  else
+    call single_site_sweep_cluster(X,accept,reject)
+  endif
+  call cpu_time(t4)
+
+  tsweep = tsweep + t4-t3
+
+  call do_measurements(X,t5,t6)
+  teigenvector = teigenvector + t5
+  tmeas = tmeas + t6
  enddo
 
  print *, 'meas finished, X='
@@ -134,12 +164,16 @@ do ibeta = 1,nbeta
  print *, '===================================='
  
  include 'output_results.f90' 
-enddo
+
+ call cpu_time(t7)
+ write (*,*) 'Warmup CPU time =               ', t2-t1
+ write (*,*) 'Sweep time during meas =        ', tsweep
+ write (*,*) 'Diag (eigenpairs) during meas = ', teigenvector
+ write (*,*) 'Meas quantities time =          ', tmeas
+ write (*,*) 'Total CPU time =                ', t7-t1
+enddo ! end of loop over beta
 
 call deallocate_quantities() 
-
-call cpu_time(t2)
-write (*,*) 'Elapsed CPU time = ', t2-t1
 
 stop
 end program main
