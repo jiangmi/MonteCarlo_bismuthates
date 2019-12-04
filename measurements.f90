@@ -354,10 +354,10 @@ end subroutine allocate_quantities
  do ix = 0,Nx-1
   do iy = 0,Ny-1
    i = return_index_for_coordinates(ix,iy,0)
-   ixp = return_index_for_coordinates(ix,iy,1)
-   iyp = return_index_for_coordinates(ix,iy,2)
-   ixm = return_index_for_coordinates(ix-1,iy,1)
-   iym = return_index_for_coordinates(ix,iy-1,2)
+   ixp = return_index_for_coordinates(ix  ,iy  ,1)
+   ixm = return_index_for_coordinates(ix-1,iy  ,1)
+   iyp = return_index_for_coordinates(ix  ,iy  ,2)
+   iym = return_index_for_coordinates(ix  ,iy-1,2)
 
    !sum over eigenstates
    do n1 = 0,N-1
@@ -487,8 +487,8 @@ end subroutine allocate_quantities
            j = return_index_for_coordinates(jx,jy,0)
            jxp = return_index_for_coordinates(jx  ,jy  ,1)
            jxm = return_index_for_coordinates(jx-1,jy  ,1)
-           jyp = return_index_for_coordinates(jx  ,jy  ,1)
-           jym = return_index_for_coordinates(jx  ,jy-1,1)
+           jyp = return_index_for_coordinates(jx  ,jy  ,2)
+           jym = return_index_for_coordinates(jx  ,jy-1,2)
 
            k = dclass(i,j)
           ! print*, 'meas ', k,i,j
