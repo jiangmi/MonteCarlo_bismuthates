@@ -13,6 +13,7 @@ module parameters
  integer nwarms, ninv, nmeas, nbin, nbeta
  integer if_X_displace                   ! No displacement for checking code
  integer if_print_MC
+ integer if_meas_spatial_corre
  integer travel_cluster                  ! if using travelling cluster sampling
  double precision mu
  double precision tsp                    !O-Bi overlap integral
@@ -48,6 +49,7 @@ contains
  spring_const = springval
  if_X_displace = 1
  if_print_MC = 1
+ if_meas_spatial_corre = 0
  dXamp = dXampval
  travel_cluster = 1
 

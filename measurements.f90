@@ -458,7 +458,6 @@ end subroutine allocate_quantities
        asp2 = asp2 + tmp1/(Nbi/2.0)
      endif
 
-     ! second sum over eigenstates for bipolaron (Bp) and Sp correlation
      do n2 = 0,N-1
        !!!!!!!!!!!!!!!!!!!!!!!!!!
        !!       bipolaron      !!
@@ -482,84 +481,89 @@ end subroutine allocate_quantities
          abp2 = abp2 + tmp1/(Nbi/2.0)
        endif
 
-       do jx = 0,Nx-1
-         do jy = 0,Ny-1
-           j = return_index_for_coordinates(jx,jy,0)
-           jxp = return_index_for_coordinates(jx  ,jy  ,1)
-           jxm = return_index_for_coordinates(jx-1,jy  ,1)
-           jyp = return_index_for_coordinates(jx  ,jy  ,2)
-           jym = return_index_for_coordinates(jx  ,jy-1,2)
+       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+       !!  second loop over sites for correlation functions  !!
+       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+       if (if_meas_spatial_corre==1) then 
+         do jx = 0,Nx-1
+           do jy = 0,Ny-1
+             j = return_index_for_coordinates(jx,jy,0)
+             jxp = return_index_for_coordinates(jx  ,jy  ,1)
+             jxm = return_index_for_coordinates(jx-1,jy  ,1)
+             jyp = return_index_for_coordinates(jx  ,jy  ,2)
+             jym = return_index_for_coordinates(jx  ,jy-1,2)
 
-           k = dclass(i,j)
-          ! print*, 'meas ', k,i,j
+             k = dclass(i,j)
+             ! print*, 'meas ', k,i,j
 
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-           !!  single polaron staggered correlation  !!
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-           Xj_Ls = -0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
-           tmp1 = fermi(n1)*fermi(n2)*Xi_Ls*Xj_Ls*phase(i,j)/dclass_F(k)
-           factor = 4.0*tmp1
-           aspolaron_ij(k) = aspolaron_ij(k) + factor*nr(i,n1)*nr(j,n2)
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             !!  single polaron staggered correlation  !!
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             Xj_Ls = -0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
+             tmp1 = fermi(n1)*fermi(n2)*Xi_Ls*Xj_Ls*phase(i,j)/dclass_F(k)
+             factor = 4.0*tmp1
+             aspolaron_ij(k) = aspolaron_ij(k) + factor*nr(i,n1)*nr(j,n2)
 
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-           !!  bipolaron staggered correlation  !!
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-           ! need additional two sum over eigenstates for bipolaron etc.
-           ! X_iLs*X_jLs * n_iup*n_idn*n_jup*n_jdn
-           tmp2 = 0.0
-           do n3 = 0,N-1
-             do n4 = 0,N-1
-               factor = tmp1*fermi(n3)*fermi(n4)
-               tmp2 = tmp2 + factor* nr(i,n1)*nr(i,n2)*nr(j,n3)*nr(j,n4)
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             !!  bipolaron staggered correlation  !!
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             ! need additional two sum over eigenstates for bipolaron etc.
+             ! X_iLs*X_jLs * n_iup*n_idn*n_jup*n_jdn
+             tmp2 = 0.0
+             do n3 = 0,N-1
+               do n4 = 0,N-1
+                 factor = tmp1*fermi(n3)*fermi(n4)
+                 tmp2 = tmp2 + factor* nr(i,n1)*nr(i,n2)*nr(j,n3)*nr(j,n4)
+               enddo
              enddo
-           enddo
 
-           abpolaron_ij(k) = abpolaron_ij(k) + tmp2
+             abpolaron_ij(k) = abpolaron_ij(k) + tmp2
 
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-           !!  correct Sp staggered correlation by Bp  !!
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-           ! need additional two sum over eigenstates for bipolaron etc.
-           ! X_iLs*X_jLs * n_iup*n_jup*n_jdn temporary term
-           tmp3 = 0.0
-           do n3 = 0,N-1
-             factor = 2.0*tmp1*fermi(n3)
-             tmp3 = tmp3 - factor* (nr(i,n1)*nr(j,n2)*nr(j,n3)  &
-                                   +nr(j,n1)*nr(i,n2)*nr(i,n3))
-           enddo
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             !!  correct Sp staggered correlation by Bp  !!
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             ! need additional two sum over eigenstates for bipolaron etc.
+             ! X_iLs*X_jLs * n_iup*n_jup*n_jdn temporary term
+             tmp3 = 0.0
+             do n3 = 0,N-1
+               factor = 2.0*tmp1*fermi(n3)
+               tmp3 = tmp3 - factor* (nr(i,n1)*nr(j,n2)*nr(j,n3)  &
+                                     +nr(j,n1)*nr(i,n2)*nr(i,n3))
+             enddo
 
-           ! correction
-           aspolaron_ij(k) = aspolaron_ij(k) + 4.0*tmp2 + tmp3
+             ! correction
+             aspolaron_ij(k) = aspolaron_ij(k) + 4.0*tmp2 + tmp3
 
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
-           !!      s-wave susceptibilities     !!                                                 
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-           do o1 = 0,Norb-1
-             i1 = return_index_for_coordinates(ix,iy,o1)
-             i2 = return_index_for_coordinates(jx,jy,o1)
-             achi_sc(o1) = achi_sc(o1) + fermi(n1)*fermi(n2)/Nbi   &
-                 *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
-           enddo
-
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
-           !!      charge susceptibilities     !!                                                 
-           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-           do o1 = 0,Norb-1
-             do o2 = 0,Norb-1
-               j1 = return_index_for_coordinates(ix,iy,0)
-               j2 = return_index_for_coordinates(jx,jy,0)
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
+             !!      s-wave susceptibilities     !!                                                 
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+             do o1 = 0,Norb-1
                i1 = return_index_for_coordinates(ix,iy,o1)
-               i2 = return_index_for_coordinates(jx,jy,o2)
-               achi_ch(k,o1,o2) = achi_ch(k,o1,o2) + 4.0d0*fermi(n1)*fermi(n2)/Nbi   &
-                   *expqr(k,j1,j2)*U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
-                  ! *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
+               i2 = return_index_for_coordinates(jx,jy,o1)
+               achi_sc(o1) = achi_sc(o1) + fermi(n1)*fermi(n2)/Nbi   &
+                   *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
+             enddo
+
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
+             !!      charge susceptibilities     !!                                                 
+             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+             do o1 = 0,Norb-1
+               do o2 = 0,Norb-1
+                 j1 = return_index_for_coordinates(ix,iy,0)
+                 j2 = return_index_for_coordinates(jx,jy,0)
+                 i1 = return_index_for_coordinates(ix,iy,o1)
+                 i2 = return_index_for_coordinates(jx,jy,o2)
+                 achi_ch(k,o1,o2) = achi_ch(k,o1,o2) + 4.0d0*fermi(n1)*fermi(n2)/Nbi   &
+                     *expqr(k,j1,j2)*U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
+                    ! *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
+               enddo
              enddo
            enddo
-         enddo
-       enddo  !end loop jx, jy
+         enddo  !end loop jx, jy
+       endif    !end if_meas_spatial_corre
      enddo !end loop n2
     enddo  !end loop n1
-    
+
     !Print quantities for each MC measurement
     if (if_print_MC==1) then
       530 format(f13.5)

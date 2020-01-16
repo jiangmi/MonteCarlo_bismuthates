@@ -102,7 +102,7 @@ contains
  !cluster_boundary(i,4): 4 denotes the cluster located within x:[1,2]; y:[3,4]
  implicit none
  integer ix, iy, jx, jy, kx, ky, i, j, cnt, iorb, jorb
- integer, dimension(1:Nc) :: tmp  
+ integer, dimension(0:Nc-1) :: tmp  
  allocate(cluster_boundary(0:N-1, 4))
  allocate(cluster_sites(0:N-1,0:Nc-1))
 
@@ -143,9 +143,10 @@ contains
      endif
 
      !print*, 'site',i, 'cluster:', tmp
-     !call sort(tmp)
      cluster_sites(i,:) = tmp
-     !print*, 'site',i, 'sorted cluster:', cluster_sites(i,:)
+
+     !call sort(tmp)
+     !print*, 'site',i, 'sorted cluster:', tmp
    enddo
   enddo
  enddo
