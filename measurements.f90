@@ -27,8 +27,9 @@ module measurements
 
  !utility arrays
  double precision, dimension(:), allocatable  :: fermi
- double precision, dimension(:,:), allocatable  :: ns
- double precision, dimension(:,:), allocatable  :: nLs
+ double precision, dimension(:,:,:), allocatable  :: ns
+ double precision, dimension(:,:,:), allocatable  :: nLs
+ double precision, dimension(:,:,:), allocatable  :: nsLs
  double precision, dimension(:,:), allocatable  :: nr
 
  !Below site-dependent quantities along MC updates
@@ -100,8 +101,9 @@ contains
  use parameters
  implicit none
  allocate(fermi(0:N-1))
- allocate(ns(0:Nbi-1, 0:N-1))
- allocate(nLs(0:Nbi-1, 0:N-1))
+ allocate(ns(0:Nbi-1, 0:Nbi-1, 0:N-1))
+ allocate(nLs(0:Nbi-1, 0:Nbi-1, 0:N-1))
+ allocate(nsLs(0:Nbi-1, 0:Nbi-1, 0:N-1))
  allocate(nr(0:Nbi-1, 0:N-1))
  allocate(aEk(0:N-1))
  allocate(anbis(0:Nbi-1))
@@ -167,7 +169,7 @@ end subroutine allocate_quantities
  subroutine deallocate_quantities()
  implicit none
  deallocate(fermi)
- deallocate(ns, nLs, nr)
+ deallocate(ns, nLs, nsLs, nr)
  deallocate(aEk, bEk)
  deallocate(anbis, anpLs, anpLd, anpLx, anpLy)
  deallocate(aspolaron, abpolaron)
@@ -295,8 +297,8 @@ end subroutine allocate_quantities
  double precision Xi_Ls, Xi_Ld, Xi_Lx, Xi_Ly, Xj_Ls
  double precision a_innLd, a_innLx, a_innLy
  double precision a_innLd2, a_innLx2, a_innLy2
- double precision tmp1, tmp2, tmp3
- double precision energy, fac, fac1, factor
+ double precision tmp1, tmp2, tmp3, tmp4, tmp5, tmp6
+ double precision energy, fac, factor
  double precision tm1, tm2, tm3, teigen, tmeas
  double precision, dimension(0:N-1) :: X
  double precision, dimension(0:N-1) :: Ek
@@ -316,7 +318,15 @@ end subroutine allocate_quantities
  fermi = 0.0d0
  ns = 0.0d0
  nLs = 0.d0
+ nsLs = 0.d0
  nr = 0.d0
+
+ tmp1 = 0.d0
+ tmp2 = 0.d0
+ tmp3 = 0.d0
+ tmp4 = 0.d0
+ tmp5 = 0.d0
+ tmp6 = 0.d0
 
  call cpu_time(tm1)
 
@@ -359,11 +369,23 @@ end subroutine allocate_quantities
    iyp = return_index_for_coordinates(ix  ,iy  ,2)
    iym = return_index_for_coordinates(ix  ,iy-1,2)
 
-   !sum over eigenstates
-   do n1 = 0,N-1
-     ns(i,n1)  = U(i,n1)*U(i,n1)
-     nLs(i,n1) = (0.5d0*(U(ixp,n1) - U(ixm,n1) + U(iyp,n1) - U(iym,n1)))**2.0
-     nr(i,n1)  = ns(i,n1) + nLs(i,n1)
+   do jx = 0,Nx-1
+    do jy = 0,Ny-1
+     j = return_index_for_coordinates(jx,jy,0)
+     jxp = return_index_for_coordinates(jx  ,jy  ,1)
+     jxm = return_index_for_coordinates(jx-1,jy  ,1)
+     jyp = return_index_for_coordinates(jx  ,jy  ,2)
+     jym = return_index_for_coordinates(jx  ,jy-1,2)
+
+     !sum over eigenstates
+     do n1 = 0,N-1
+       ns(i,j,n1)  = U(i,n1)*U(j,n1)
+       nLs(i,j,n1) = (0.5d0*(U(ixp,n1) - U(ixm,n1) + U(iyp,n1) - U(iym,n1)))  &
+                    *(0.5d0*(U(jxp,n1) - U(jxm,n1) + U(jyp,n1) - U(jym,n1)))
+       nsLs(i,j,n1) = U(i,n1)*0.5d0*(U(jxp,n1) - U(jxm,n1) + U(jyp,n1) - U(jym,n1))
+       nr(i,n1)  = ns(i,i,n1) + nLs(i,i,n1)
+      enddo
+     enddo
    enddo
   enddo
  enddo
@@ -374,10 +396,10 @@ end subroutine allocate_quantities
  do ix = 0,Nx-1
   do iy = 0,Ny-1
    i = return_index_for_coordinates(ix,iy,0)
-   ixp = return_index_for_coordinates(ix,iy,1) 
-   iyp = return_index_for_coordinates(ix,iy,2) 
-   ixm = return_index_for_coordinates(ix-1,iy,1)
-   iym = return_index_for_coordinates(ix,iy-1,2)
+   ixp = return_index_for_coordinates(ix  ,iy  ,1)
+   ixm = return_index_for_coordinates(ix-1,iy  ,1)
+   iyp = return_index_for_coordinates(ix  ,iy  ,2)
+   iym = return_index_for_coordinates(ix  ,iy-1,2)
 
    Xi_Ls = 0.5d0*(X(ixm) - X(ixp) + X(iym) - X(iyp))
    Xi_Ld = 0.5d0*(X(ixm) - X(ixp) - X(iym) + X(iyp))
@@ -387,7 +409,7 @@ end subroutine allocate_quantities
    !sum over eigenstates
    do n1 = 0,N-1
      fac = 2.0d0*fermi(n1)/Nbi
-     tmp1 = fac*ns(i,n1)
+     tmp1 = fac*ns(i,i,n1)
      tmp2 = fac*U(ixp,n1)*U(ixp,n1)
      tmp3 = fac*U(iyp,n1)*U(iyp,n1)
      anbis(i) = anbis(i) + tmp1*Nbi
@@ -403,11 +425,11 @@ end subroutine allocate_quantities
      a_innLx2 = a_innLx*a_innLx
      a_innLy2 = a_innLy*a_innLy
 
-     anpLs(i)  = anpLs(i) + fac*nLs(i,n1)*Nbi
+     anpLs(i)  = anpLs(i) + fac*nLs(i,i,n1)*Nbi
      anpLd(i)  = anpLd(i) + fac*a_innLd2*Nbi
      anpLx(i)  = anpLx(i) + fac*a_innLx2*Nbi
      anpLy(i)  = anpLy(i) + fac*a_innLy2*Nbi
-     anpLs_avg = anpLs_avg + fac*nLs(i,n1)
+     anpLs_avg = anpLs_avg + fac*nLs(i,i,n1)
      anpLd_avg = anpLd_avg + fac*a_innLd2
      anpLx_avg = anpLx_avg + fac*a_innLx2
      anpLy_avg = anpLy_avg + fac*a_innLy2
@@ -416,7 +438,7 @@ end subroutine allocate_quantities
      if (if_print_MC==1) then
        ns_mc(i) = ns_mc(i) + tmp1*Nbi
        npx_mc(i) = npx_mc(i) + tmp2*Nbi
-       nLs_mc(i) = nLs_mc(i) + fac*nLs(i,n1)*Nbi
+       nLs_mc(i) = nLs_mc(i) + fac*nLs(i,i,n1)*Nbi
        nLd_mc(i) = nLd_mc(i) + fac*a_innLd2*Nbi
        nLx_mc(i) = nLx_mc(i) + fac*a_innLx2*Nbi
        nLy_mc(i) = nLy_mc(i) + fac*a_innLy2*Nbi
@@ -428,12 +450,12 @@ end subroutine allocate_quantities
        anbi1 = anbi1 + tmp1/0.5
        anpx1 = anpx1 + tmp2/0.5
        anpy1 = anpy1 + tmp3/0.5
-       anpLs1 = anpLs1 + fac*nLs(i,n1)/0.5
+       anpLs1 = anpLs1 + fac*nLs(i,i,n1)/0.5
      else
        anbi2 = anbi2 + tmp1/0.5
        anpx2 = anpx2 + tmp2/0.5
        anpy2 = anpy2 + tmp3/0.5
-       anpLs2 = anpLs2 + fac*nLs(i,n1)/0.5
+       anpLs2 = anpLs2 + fac*nLs(i,i,n1)/0.5
      endif
 
      !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -447,7 +469,7 @@ end subroutine allocate_quantities
      !record quantities for each MC measurement
      if (if_print_MC==1) then
        Sp_mc(i)  = Sp_mc(i) + tmp1
-       Sp1_mc(i) = Sp1_mc(i) + 2.0d0*fermi(n1)*nLs(i,n1)
+       Sp1_mc(i) = Sp1_mc(i) + 2.0d0*fermi(n1)*nLs(i,i,n1)
      endif
 
      !Also compute single polaron density for two sublattices
@@ -462,7 +484,6 @@ end subroutine allocate_quantities
        !!!!!!!!!!!!!!!!!!!!!!!!!!
        !!       bipolaron      !!
        !!!!!!!!!!!!!!!!!!!!!!!!!!
-       fac1 = 2.0d0*fermi(n2)/Nbi
        tmp1 = fermi(n1)*fermi(n2)* Xi_Ls*nr(i,n1)*nr(i,n2)
        abpolaron(i) = abpolaron(i) + tmp1
        abp_site_avg = abp_site_avg + tmp1/Nbi
@@ -470,7 +491,7 @@ end subroutine allocate_quantities
        !record quantities for each MC measurement
        if (if_print_MC==1) then
          Bp_mc(i) = Bp_mc(i) + tmp1
-         Bp1_mc(i) = Bp1_mc(i) + fermi(n1)*fermi(n2)* nLs(i,n1)*nLs(i,n2)
+         Bp1_mc(i) = Bp1_mc(i) + fermi(n1)*fermi(n2)* nLs(i,i,n1)*nLs(i,i,n2)
        endif
 
        !Also compute bipolaron density for two sublattices
@@ -496,70 +517,89 @@ end subroutine allocate_quantities
              k = dclass(i,j)
              ! print*, 'meas ', k,i,j
 
+             Xj_Ls = -0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
+             factor = fermi(n1)*fermi(n2)*Xi_Ls*Xj_Ls*phase(i,j)/dclass_F(k)
+
+             tmp4 = ns(i,i,n1)*ns(j,j,n2) - ns(i,j,n1)*ns(j,i,n2)
+             tmp5 = ns(i,i,n1)*nLs(i,i,n2)
+             tmp6 = nr(i,n1)*nr(i,n2)
+
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
              !!  single polaron staggered correlation  !!
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-             Xj_Ls = -0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
-             tmp1 = fermi(n1)*fermi(n2)*Xi_Ls*Xj_Ls*phase(i,j)/dclass_F(k)
-             factor = 4.0*tmp1
-             aspolaron_ij(k) = aspolaron_ij(k) + factor*nr(i,n1)*nr(j,n2)
+             if (j==i) then
+               tmp2 = 2.0*( nr(i,n1)+2.0*tmp5 ) + 2.0*tmp6
+             else
+               tmp2 = 4.0*tmp6 &
+                    - 2.0*( ns(i,j,n1)*ns(j,i,n2) + nLs(i,j,n1)*nLs(j,i,n2) &
+                           +nsLs(i,j,n1)*nsLs(j,i,n2)+nsLs(j,i,n1)*nsLs(i,j,n2))
+             endif
+
+             aspolaron_ij(k) = aspolaron_ij(k) + factor*tmp2
 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
              !!  bipolaron staggered correlation  !!
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-             ! need additional two sum over eigenstates for bipolaron etc.
-             ! X_iLs*X_jLs * n_iup*n_idn*n_jup*n_jdn
-             tmp2 = 0.0
-             do n3 = 0,N-1
-               do n4 = 0,N-1
-                 factor = tmp1*fermi(n3)*fermi(n4)
-                 tmp2 = tmp2 + factor* nr(i,n1)*nr(i,n2)*nr(j,n3)*nr(j,n4)
+             if (j==i) then
+               tmp2 = ns(i,i,n1)*ns(i,i,n2)
+             else
+               ! need additional two sum over eigenstates for bipolaron etc.
+               ! X_iLs*X_jLs * n_iup*n_idn*n_jup*n_jdn
+               tmp2 = 0.0
+               do n3 = 0,N-1
+                 do n4 = 0,N-1
+                   tmp2 = tmp2 + fermi(n3)*fermi(n4)* tmp4 &
+                     *(ns(i,i,n3)*ns(j,j,n4) - ns(i,j,n3)*ns(j,i,n4))
+                 enddo
                enddo
-             enddo
+             endif
 
-             abpolaron_ij(k) = abpolaron_ij(k) + tmp2
+             abpolaron_ij(k) = abpolaron_ij(k) + factor*tmp2
 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
              !!  correct Sp staggered correlation by Bp  !!
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-             ! need additional two sum over eigenstates for bipolaron etc.
-             ! X_iLs*X_jLs * n_iup*n_jup*n_jdn temporary term
-             tmp3 = 0.0
-             do n3 = 0,N-1
-               factor = 2.0*tmp1*fermi(n3)
-               tmp3 = tmp3 - factor* (nr(i,n1)*nr(j,n2)*nr(j,n3)  &
-                                     +nr(j,n1)*nr(i,n2)*nr(i,n3))
-             enddo
+             if (j==i) then
+               tmp3 = -8.0*tmp6
+               do n3 = 0,N-1
+                 tmp3 = tmp3 - 16.0*tmp5*nr(i,n3) 
+               enddo
+             else
+               tmp3 = 0.0
+               do n3 = 0,N-1
+                 tmp3 = tmp3-fermi(n3)*4.0*tmp4*(nr(i,n3)+nr(j,n3))
+               enddo
+             endif
 
              ! correction
-             aspolaron_ij(k) = aspolaron_ij(k) + 4.0*tmp2 + tmp3
+             aspolaron_ij(k) = aspolaron_ij(k) + factor*(4.0*tmp2 + tmp3)
 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
              !!      s-wave susceptibilities     !!                                                 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-             do o1 = 0,Norb-1
-               i1 = return_index_for_coordinates(ix,iy,o1)
-               i2 = return_index_for_coordinates(jx,jy,o1)
-               achi_sc(o1) = achi_sc(o1) + fermi(n1)*fermi(n2)/Nbi   &
-                   *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
-             enddo
+!             do o1 = 0,Norb-1
+!               i1 = return_index_for_coordinates(ix,iy,o1)
+!               i2 = return_index_for_coordinates(jx,jy,o1)
+!               achi_sc(o1) = achi_sc(o1) + fermi(n1)*fermi(n2)/Nbi   &
+!                   *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
+!             enddo
 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
              !!      charge susceptibilities     !!                                                 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-             do o1 = 0,Norb-1
-               do o2 = 0,Norb-1
-                 j1 = return_index_for_coordinates(ix,iy,0)
-                 j2 = return_index_for_coordinates(jx,jy,0)
-                 i1 = return_index_for_coordinates(ix,iy,o1)
-                 i2 = return_index_for_coordinates(jx,jy,o2)
-                 achi_ch(k,o1,o2) = achi_ch(k,o1,o2) + 4.0d0*fermi(n1)*fermi(n2)/Nbi   &
-                     *expqr(k,j1,j2)*U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
-                    ! *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
-               enddo
-             enddo
-           enddo
-         enddo  !end loop jx, jy
+!             do o1 = 0,Norb-1
+!               do o2 = 0,Norb-1
+!                 j1 = return_index_for_coordinates(ix,iy,0)
+!                 j2 = return_index_for_coordinates(jx,jy,0)
+!                 i1 = return_index_for_coordinates(ix,iy,o1)
+!                 i2 = return_index_for_coordinates(jx,jy,o2)
+!                 achi_ch(k,o1,o2) = achi_ch(k,o1,o2) + 4.0d0*fermi(n1)*fermi(n2)/Nbi   &
+!                     *expqr(k,j1,j2)*U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
+!                    ! *U(i1,n1)*U(i1,n1)*U(i2,n2)*U(i2,n2)
+!               enddo
+!             enddo
+           enddo !end loop jy
+         enddo  !end loop jx
        endif    !end if_meas_spatial_corre
      enddo !end loop n2
     enddo  !end loop n1

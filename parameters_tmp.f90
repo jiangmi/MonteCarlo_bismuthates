@@ -48,10 +48,10 @@ contains
  alpha = alphaval
  spring_const = springval
  if_X_displace = 1
- if_print_MC = 1
- if_meas_spatial_corre = 0
+ if_print_MC = 0
+ if_meas_spatial_corre = 1
  dXamp = dXampval
- travel_cluster = 1
+ travel_cluster = 0
 
  nbeta = nbetaval
  allocate(betas(1:nbeta))

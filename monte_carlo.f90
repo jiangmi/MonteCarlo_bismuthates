@@ -187,36 +187,42 @@ contains
  integer, dimension(0:Nc-1) :: Ncsites
 
  !sweep every site and its surrounding cluster
- do site = NBi,N-1
-   Ncsites = cluster_sites(site,0:Nc-1)
-   xmin = cluster_boundary(site,1)
-   xmax = cluster_boundary(site,2)
-   ymin = cluster_boundary(site,3)
-   ymax = cluster_boundary(site,4)
+ do iorb = 1,2
+  do ix = 0,Nx-1
+   do iy = 0,Ny-1                                                                   
+     site = return_index_for_coordinates(ix,iy,iorb)
 
-   call compute_total_E_cluster(Eold,X,Ncsites)
+     Ncsites = cluster_sites(site,0:Nc-1)
+     xmin = cluster_boundary(site,1)
+     xmax = cluster_boundary(site,2)
+     ymin = cluster_boundary(site,3)
+     ymax = cluster_boundary(site,4)
 
-   deltaX = (ran2(iran)-0.5d0)*2.d0*dXamp
-   Xproposed = X
-   Xproposed(site) = Xproposed(site) + deltaX
+     call compute_total_E_cluster(Eold,X,Ncsites)
 
-   call compute_total_E_cluster(Enew,XProposed,Ncsites)
-   ratio = minval([exp(-beta*(Enew-Eold)),1.0d0])
-   r = ran2(iran)
-   !print *, "Eold = ", Eold
-   !print *, "Enew = ", Enew
-   !print *, "ratio = ", ratio
+     deltaX = (ran2(iran)-0.5d0)*2.d0*dXamp
+     Xproposed = X
+     Xproposed(site) = Xproposed(site) + deltaX
 
-   if(r.le.ratio)then
-    accept = accept + 1
-    Eold = Enew
-    X = Xproposed
-    !print*, "accepted new displacement X="
-    !print*, X(NBi:N-1)
-   else
-    !print*, "X update rejected"
-    reject = reject + 1
-   endif
+     call compute_total_E_cluster(Enew,XProposed,Ncsites)
+     ratio = minval([exp(-beta*(Enew-Eold)),1.0d0])
+     r = ran2(iran)
+     !print *, "Eold = ", Eold
+     !print *, "Enew = ", Enew
+     !print *, "ratio = ", ratio
+
+     if(r.le.ratio)then
+      accept = accept + 1
+      Eold = Enew
+      X = Xproposed
+      !print*, "accepted new displacement X="
+      !print*, X(NBi:N-1)
+     else
+      !print*, "X update rejected"
+      reject = reject + 1
+     endif
+   enddo
+  enddo
  enddo
 
  return
