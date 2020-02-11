@@ -12,7 +12,7 @@ use cluster
 use monte_carlo
 use measurements
 implicit none
-integer ii,jj,i,j,k,ix,iy, bin, ibeta
+integer ii,jj,i,j,k,ix,iy, bin, ibeta, idstart
 double precision mean,std,Emean,Estd,Nmean,Nstd, &
                  spmean,spstd,bpmean,bpstd,      &
                  swave_s_mean, swave_s_std,      &
@@ -22,6 +22,7 @@ double precision means(12)  ! store sublat dependent quantities
 double precision t1, t2, t3, t4, t5, t6, t7, tsweep, teigenvector,tmeas
 double precision Xval, Etot, Xavg
 double precision, dimension(:),   allocatable :: X
+double precision, dimension(:),   allocatable :: X_input
 double precision, dimension(:,:), allocatable :: H0
 
 call init_parameters()     ! classify distance in cluster.f90
@@ -40,6 +41,9 @@ print*, 'Enter a random seed for this run:'
 iran = -312434;
 !allocate space for the non-interacting Hamiltonian and displacements
 allocate(X(0:N-1))
+if (if_use_equilibrium_X==1) then
+ allocate(X_input(1:(nbeta*2*Nbi)))
+endif
 allocate(H0(0:N-1,0:N-1))
 
 !Initialize the displacement to zero and then a small value
@@ -78,41 +82,67 @@ X = 0.0d0
 do ibeta = 1,nbeta
  call cpu_time(t1)
 
+ ! Decide if using equilibrium X at the corresponding T in previous run
+ ! so that the measurements and warmup can be separately performed
+ ! Otherwise, do nothing means using X from the last T
+ if (if_use_equilibrium_X==1) then
+   open(35, file='X_readin', status='old')
+   do i = 1,nbeta*2*Nbi
+     read(35,*) X_input(i)
+   enddo
+
+   idstart = (ibeta-1)*2*Nbi+1
+   X = 0.0d0
+   do i = Nbi,N-1 
+     X(i) = X_input(idstart+i-Nbi)
+   enddo 
+
+   print *, 'readin equilibrium X of previous run done, X='
+   do ii=Nbi,N-1
+     print *, X(ii)
+   enddo
+   print *, '<|X|> =', sum(abs(X(Nbi:N-1)))/(N*2/3)
+
+   close(35)
+ endif
+
  beta = betas(ibeta)
  print*, '  '
  print*, '==========================================================='
  print 600, 'Start carrying out MC for beta = ', beta, 'T = ', 1./beta
  
- ! warmup begins
- accept = 0
- reject = 0
- do i = 1,nwarms
-  if(mod(i,nwarms/ninv).eq.0)then
-   print 500, 'Completed Warmup', i, 'of', nwarms, &
-           'Accept ratio = ', dfloat(accept)/(dfloat(accept+reject))
+ ! warmup begins if not using equilibrium X in previous run
+ if (if_use_equilibrium_X/=1) then
    accept = 0
    reject = 0
-  endif
-  !print*, '------------------------'
-  !print*, 'warmup sweep No.',i
-  if (travel_cluster==0) then
-    call single_site_sweep(X,accept,reject)
-  else
-    call single_site_sweep_cluster(X,accept,reject)
-  endif
- enddo
+   do i = 1,nwarms
+    if(mod(i,nwarms/ninv).eq.0)then
+     print 500, 'Completed Warmup', i, 'of', nwarms, &
+             'Accept ratio = ', dfloat(accept)/(dfloat(accept+reject))
+     accept = 0
+     reject = 0
+    endif
+    !print*, '------------------------'
+    !print*, 'warmup sweep No.',i
+    if (travel_cluster==0) then
+      call single_site_sweep(X,accept,reject)
+    else
+      call single_site_sweep_cluster(X,accept,reject)
+    endif
+   enddo
 
- print *, 'warmup finished, X='
- do ii=Nbi,N-1
-   print *, X(ii)
- enddo
- print *, '<|X|> =', sum(abs(X(Nbi:N-1)))/(N*2/3)
+   print *, 'warmup finished, X='
+   do ii=Nbi,N-1
+     print *, X(ii)
+   enddo
+   print *, '<|X|> =', sum(abs(X(Nbi:N-1)))/(N*2/3)
 
- call compute_total_E(Etot, X)
- print *, 'warmup finished, total E=', Etot
+   call compute_total_E(Etot, X)
+   print *, 'warmup finished, total E=', Etot
 
- call cpu_time(t2)
- 
+   call cpu_time(t2)
+ endif ! end if_use_equilibrium_X
+
  ! measurements begins
  tsweep = 0.0
  teigenvector = 0.0
@@ -147,7 +177,10 @@ do ibeta = 1,nbeta
 
   tsweep = tsweep + t4-t3
 
-  call do_measurements(X,t5,t6)
+  !Do measurement per 10 MC sweeps
+  if (mod(i,10).eq.0) then
+    call do_measurements(X,t5,t6,i)
+  endif
   teigenvector = teigenvector + t5
   tmeas = tmeas + t6
  enddo

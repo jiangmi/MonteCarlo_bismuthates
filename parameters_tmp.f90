@@ -12,6 +12,7 @@ module parameters
  integer num_beta_steps
  integer nwarms, ninv, nmeas, nbin, nbeta
  integer if_X_displace                   ! No displacement for checking code
+ integer if_use_equilibrium_X
  integer if_print_MC
  integer if_meas_spatial_corre
  integer travel_cluster                  ! if using travelling cluster sampling
@@ -48,6 +49,7 @@ contains
  alpha = alphaval
  spring_const = springval
  if_X_displace = 1
+ if_use_equilibrium_X = 0
  if_print_MC = 0
  if_meas_spatial_corre = 1
  dXamp = dXampval

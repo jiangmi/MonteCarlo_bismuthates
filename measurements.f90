@@ -282,7 +282,7 @@ end subroutine allocate_quantities
  !============================================================================
  ! do_measurements below
  !============================================================================
- subroutine do_measurements(X, teigen, tmeas)
+ subroutine do_measurements(X, teigen, tmeas, imeas)
  use parameters
  use cluster, only: return_index_for_coordinates, dclass, dclass_F, expqr, phase
  use monte_carlo, only: compute_total_E, get_H
@@ -291,7 +291,7 @@ end subroutine allocate_quantities
  integer ixp, iyp, ixm, iym
  integer jxp, jyp, jxm, jym
  integer i, j, k, info, i1, i2, j1, j2
- integer lwork
+ integer lwork, imeas
  double precision, dimension(0:N-1,0:N-1) :: U
  double precision, allocatable, dimension(:) :: work
  double precision Xi_Ls, Xi_Ld, Xi_Lx, Xi_Ly, Xj_Ls
@@ -435,7 +435,7 @@ end subroutine allocate_quantities
      anpLy_avg = anpLy_avg + fac*a_innLy2
 
      !record quantities for each MC measurement
-     if (if_print_MC==1) then
+     if (if_print_MC==1 .and. mod(imeas,10).eq.0) then
        ns_mc(i) = ns_mc(i) + tmp1*Nbi
        npx_mc(i) = npx_mc(i) + tmp2*Nbi
        nLs_mc(i) = nLs_mc(i) + fac*nLs(i,i,n1)*Nbi
@@ -467,7 +467,7 @@ end subroutine allocate_quantities
      asp_site_avg = asp_site_avg + tmp1/Nbi
 
      !record quantities for each MC measurement
-     if (if_print_MC==1) then
+     if (if_print_MC==1 .and. mod(imeas,10).eq.0) then
        Sp_mc(i)  = Sp_mc(i) + tmp1
        Sp1_mc(i) = Sp1_mc(i) + 2.0d0*fermi(n1)*nLs(i,i,n1)
      endif
@@ -489,7 +489,7 @@ end subroutine allocate_quantities
        abp_site_avg = abp_site_avg + tmp1/Nbi
 
        !record quantities for each MC measurement
-       if (if_print_MC==1) then
+       if (if_print_MC==1  .and. mod(imeas,10).eq.0) then
          Bp_mc(i) = Bp_mc(i) + tmp1
          Bp1_mc(i) = Bp1_mc(i) + fermi(n1)*fermi(n2)* nLs(i,i,n1)*nLs(i,i,n2)
        endif
@@ -605,7 +605,7 @@ end subroutine allocate_quantities
     enddo  !end loop n1
 
     !Print quantities for each MC measurement
-    if (if_print_MC==1) then
+    if (if_print_MC==1 .and. mod(imeas,10).eq.0) then
       530 format(f13.5)
       540 format(f13.5,f13.5,f13.5,f13.5)
       write(unit=26,fmt=540)  X(ixp), X(ixm), X(iyp), X(iym)
