@@ -155,15 +155,6 @@ do ibeta = 1,nbeta
  call zero_accumulators()
  bin = 0
  do i = 1,nmeas
-  if(mod(i,nmeas/nbin).eq.0)then
-   print 500, 'Completed Nmeas', i, 'of', nmeas,  &
-           'Accept ratio = ', dfloat(accept)/(dfloat(accept+reject))
-   accept = 0
-   reject = 0
-   bin = bin + 1
-   call populate_bins(bin)
-   call zero_accumulators()
-  endif
   !print*, '------------------------'
   !print*, 'measurement sweep No.',i
 
@@ -183,7 +174,17 @@ do ibeta = 1,nbeta
   endif
   teigenvector = teigenvector + t5
   tmeas = tmeas + t6
- enddo
+
+  if(mod(i,nmeas/nbin).eq.0)then
+   print 500, 'Completed Nmeas', i, 'of', nmeas,  &
+           'Accept ratio = ', dfloat(accept)/(dfloat(accept+reject))
+   accept = 0
+   reject = 0
+   bin = bin + 1
+   call populate_bins(bin)
+   call zero_accumulators()
+  endif
+ enddo ! end of measurement
 
  print *, 'meas finished, X='
  do ii=Nbi,N-1
