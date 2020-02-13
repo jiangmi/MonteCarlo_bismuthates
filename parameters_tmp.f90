@@ -10,9 +10,9 @@ module parameters
  integer Nbi                             !total number of Bi orbitals
  integer nclass                          !number of distance class
  integer num_beta_steps
- integer nwarms, ninv, nmeas, nbin, nbeta
+ integer nwarms, ninv, nmeas, nbin, nbeta, measinv
  integer if_X_displace                   ! No displacement for checking code
- integer if_use_equilibrium_X
+ integer if_use_equilibrium_X, if_warmup
  integer if_print_MC
  integer if_meas_spatial_corre
  integer travel_cluster                  ! if using travelling cluster sampling
@@ -49,9 +49,10 @@ contains
  alpha = alphaval
  spring_const = springval
  if_X_displace = 1
- if_use_equilibrium_X = 0
- if_print_MC = 0
- if_meas_spatial_corre = 1
+ if_use_equilibrium_X = 1
+ if_warmup = 1
+ if_print_MC = 1
+ if_meas_spatial_corre = 0
  dXamp = dXampval
  travel_cluster = 0
 
@@ -62,6 +63,7 @@ contains
  nwarms = nwarmval
  ninv = ninvval    ! print warmup progress per ninv steps
  nmeas = nmeasval 
+ measinv = measinvval
  nbin = nbinval
 
  !======================================================

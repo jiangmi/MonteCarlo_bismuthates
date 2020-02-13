@@ -18,9 +18,11 @@ double precision mean,std,Emean,Estd,Nmean,Nstd, &
                  swave_s_mean, swave_s_std,      &
                  swave_px_mean, swave_px_std,    &
                  swave_py_mean, swave_py_std
+character(len=6) str1
 double precision means(12)  ! store sublat dependent quantities
 double precision t1, t2, t3, t4, t5, t6, t7, tsweep, teigenvector,tmeas
 double precision Xval, Etot, Xavg
+character(len=:), allocatable :: str2
 double precision, dimension(:),   allocatable :: X
 double precision, dimension(:),   allocatable :: X_input
 double precision, dimension(:,:), allocatable :: H0
@@ -42,7 +44,7 @@ iran = -312434;
 !allocate space for the non-interacting Hamiltonian and displacements
 allocate(X(0:N-1))
 if (if_use_equilibrium_X==1) then
- allocate(X_input(1:(nbeta*2*Nbi)))
+ allocate(X_input(2*Nbi))
 endif
 allocate(H0(0:N-1,0:N-1))
 
@@ -80,39 +82,47 @@ X = 0.0d0
 
 ! Loop over temperature starting from highest T
 do ibeta = 1,nbeta
+ beta = betas(ibeta)
+ print*, '  '
+ print*, '==========================================================='
+ print 600, 'Start carrying out MC for beta = ', beta, 'T = ', 1./beta
+
  call cpu_time(t1)
 
  ! Decide if using equilibrium X at the corresponding T in previous run
  ! so that the measurements and warmup can be separately performed
  ! Otherwise, do nothing means using X from the last T
  if (if_use_equilibrium_X==1) then
-   open(35, file='X_readin', status='old')
-   do i = 1,nbeta*2*Nbi
+   write(str1,'(f6.1)') beta
+   if (abs(mu)<1.e-4) then
+     allocate(character(len=4) :: str2)
+     write(str2,'(f4.2)') mu
+   elseif (mu>0.0) then
+     allocate(character(len=4) :: str2)
+     write(str2,'(f4.2)') mu
+   else
+     allocate(character(len=5) :: str2)
+     write(str2,'(f5.2)') mu
+   endif
+
+   open(35, file='X_readin_mu'//adjustl(trim(str2))//'_be'//adjustl(trim(str1)), status='old')
+   do i = 1,2*Nbi
      read(35,*) X_input(i)
    enddo
 
-   idstart = (ibeta-1)*2*Nbi+1
+ !  idstart = 7*2*Nbi+1
    X = 0.0d0
-   do i = Nbi,N-1 
-     X(i) = X_input(idstart+i-Nbi)
-   enddo 
-
    print *, 'readin equilibrium X of previous run done, X='
-   do ii=Nbi,N-1
-     print *, X(ii)
+   do i=Nbi,N-1
+     X(i) = X_input(i-Nbi+1)
+     print *, X(i)
    enddo
    print *, '<|X|> =', sum(abs(X(Nbi:N-1)))/(N*2/3)
 
    close(35)
  endif
 
- beta = betas(ibeta)
- print*, '  '
- print*, '==========================================================='
- print 600, 'Start carrying out MC for beta = ', beta, 'T = ', 1./beta
- 
- ! warmup begins if not using equilibrium X in previous run
- if (if_use_equilibrium_X/=1) then
+ if (if_warmup/=1) then
    accept = 0
    reject = 0
    do i = 1,nwarms
@@ -141,7 +151,7 @@ do ibeta = 1,nbeta
    print *, 'warmup finished, total E=', Etot
 
    call cpu_time(t2)
- endif ! end if_use_equilibrium_X
+ endif ! end if_warmup
 
  ! measurements begins
  tsweep = 0.0
@@ -168,13 +178,13 @@ do ibeta = 1,nbeta
 
   tsweep = tsweep + t4-t3
 
-  !Do measurement per 10 MC sweeps
-  if (mod(i,10).eq.0) then
+  !Do measurement per measinv MC sweeps
+  if (mod(i,measinv).eq.0) then
     call do_measurements(X,t5,t6,i)
+    teigenvector = teigenvector + t5
+    tmeas = tmeas + t6
   endif
-  teigenvector = teigenvector + t5
-  tmeas = tmeas + t6
-
+ 
   if(mod(i,nmeas/nbin).eq.0)then
    print 500, 'Completed Nmeas', i, 'of', nmeas,  &
            'Accept ratio = ', dfloat(accept)/(dfloat(accept+reject))
