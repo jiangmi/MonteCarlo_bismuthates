@@ -297,7 +297,7 @@ end subroutine allocate_quantities
  double precision Xi_Ls, Xi_Ld, Xi_Lx, Xi_Ly, Xj_Ls
  double precision a_innLd, a_innLx, a_innLy
  double precision a_innLd2, a_innLx2, a_innLy2
- double precision tmp1, tmp2, tmp3, tmp4, tmp5, tmp6
+ double precision tmp1, tmp2, tmp3, tmp4, tmp5, tmp6,tmp7
  double precision energy, fac, factor
  double precision tm1, tm2, tm3, teigen, tmeas
  double precision, dimension(0:N-1) :: X
@@ -327,6 +327,7 @@ end subroutine allocate_quantities
  tmp4 = 0.d0
  tmp5 = 0.d0
  tmp6 = 0.d0
+ tmp7 = 0.d0
 
  call cpu_time(tm1)
 
@@ -520,59 +521,45 @@ end subroutine allocate_quantities
              Xj_Ls = -0.5d0*(X(jxp) - X(jxm) + X(jyp) - X(jym))
              factor = fermi(n1)*fermi(n2)*Xi_Ls*Xj_Ls*phase(i,j)/dclass_F(k)
 
-             tmp4 = ns(i,i,n1)*ns(j,j,n2) - ns(i,j,n1)*ns(j,i,n2)
-             tmp5 = ns(i,i,n1)*nLs(i,i,n2)
-             tmp6 = nr(i,n1)*nr(i,n2)
+             tmp4 = ns(i,i,n1)*ns(j,j,n2) !- ns(i,j,n1)*ns(j,i,n2)
+             tmp5 = ns(i,i,n1)*ns(i,i,n2)
+             tmp6 = ns(j,j,n1)*ns(j,j,n2)
 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
              !!  single polaron staggered correlation  !!
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-             if (j==i) then
-               tmp2 = 2.0*( nr(i,n1)+2.0*tmp5 ) + 2.0*tmp6
-             else
-               tmp2 = 4.0*tmp6 &
-                    - 2.0*( ns(i,j,n1)*ns(j,i,n2) + nLs(i,j,n1)*nLs(j,i,n2) &
-                           +nsLs(i,j,n1)*nsLs(j,i,n2)+nsLs(j,i,n1)*nsLs(i,j,n2))
-             endif
+           !  tmp2 = 4.0*tmp6   ! &
+           !       - 2.0*( ns(i,j,n1)*ns(j,i,n2) + nLs(i,j,n1)*nLs(j,i,n2) &
+           !              +nsLs(i,j,n1)*nsLs(j,i,n2)+nsLs(j,i,n1)*nsLs(i,j,n2))
 
-             aspolaron_ij(k) = aspolaron_ij(k) + factor*tmp2
+             aspolaron_ij(k) = aspolaron_ij(k) + factor*4.0*nr(i,n1)*nr(j,n2)
 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
              !!  bipolaron staggered correlation  !!
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-             if (j==i) then
-               tmp2 = ns(i,i,n1)*ns(i,i,n2)
-             else
-               ! need additional two sum over eigenstates for bipolaron etc.
-               ! X_iLs*X_jLs * n_iup*n_idn*n_jup*n_jdn
-               tmp2 = 0.0
-               do n3 = 0,N-1
-                 do n4 = 0,N-1
-                   tmp2 = tmp2 + fermi(n3)*fermi(n4)* tmp4 &
-                     *(ns(i,i,n3)*ns(j,j,n4) - ns(i,j,n3)*ns(j,i,n4))
-                 enddo
+             ! need additional two sum over eigenstates for bipolaron etc.
+             ! X_iLs*X_jLs * n_iup*n_idn*n_jup*n_jdn
+             tmp2 = 0.0
+             do n3 = 0,N-1
+               do n4 = 0,N-1
+                 tmp2 = tmp2 + fermi(n3)*fermi(n4)  &
+                   *ns(i,i,n3)*ns(j,j,n4) !- ns(i,j,n3)*ns(j,i,n4))
                enddo
-             endif
+             enddo
 
-             abpolaron_ij(k) = abpolaron_ij(k) + factor*tmp2
+             tmp7 = tmp4*tmp2
+             abpolaron_ij(k) = abpolaron_ij(k) + factor*tmp7
 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
              !!  correct Sp staggered correlation by Bp  !!
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-             if (j==i) then
-               tmp3 = -8.0*tmp6
-               do n3 = 0,N-1
-                 tmp3 = tmp3 - 16.0*tmp5*nr(i,n3) 
-               enddo
-             else
-               tmp3 = 0.0
-               do n3 = 0,N-1
-                 tmp3 = tmp3-fermi(n3)*4.0*tmp4*(nr(i,n3)+nr(j,n3))
-               enddo
-             endif
+             tmp3 = 0.0
+             do n3 = 0,N-1
+               tmp3 = tmp3-fermi(n3)*4.0*(tmp5*nr(j,n3)+tmp6*nr(i,n3))
+             enddo
 
              ! correction
-             aspolaron_ij(k) = aspolaron_ij(k) + factor*(4.0*tmp2 + tmp3)
+             aspolaron_ij(k) = aspolaron_ij(k) + factor*(4.0*tmp7 + tmp3)
 
              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                 
              !!      s-wave susceptibilities     !!                                                 
